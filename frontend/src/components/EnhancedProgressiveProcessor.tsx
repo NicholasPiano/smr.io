@@ -566,13 +566,13 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           .mini-map-grid {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            padding: 20px;
-            background: rgba(30, 41, 59, 0.8);
-            border-radius: 16px;
-            border: 2px solid rgba(148, 163, 184, 0.3);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
+            gap: 16px;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+            border-radius: 20px;
+            border: 3px solid rgba(148, 163, 184, 0.6);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
           }
 
           .mini-map-row {
@@ -582,50 +582,51 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 
           .mini-map-section {
             flex: 1;
-            height: 40px;
-            border-radius: 8px;
-            border: 2px solid rgba(148, 163, 184, 0.4);
+            height: 50px;
+            border-radius: 12px;
+            border: 3px solid;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
           }
 
           .mini-map-section.original-text {
             flex: 2; /* Double width for original text */
-            background: linear-gradient(135deg, rgba(71, 85, 105, 0.6), rgba(71, 85, 105, 0.8));
-            border-color: rgba(71, 85, 105, 0.8);
-            color: #f1f5f9;
+            background: linear-gradient(135deg, #475569, #64748b);
+            border-color: #64748b;
+            color: #ffffff;
           }
 
           .mini-map-section.f1 {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0.7));
-            border-color: rgba(59, 130, 246, 0.8);
-            color: #dbeafe;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-color: #1d4ed8;
+            color: #ffffff;
           }
 
           .mini-map-section.f2 {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(139, 92, 246, 0.7));
-            border-color: rgba(139, 92, 246, 0.8);
-            color: #e4d4ff;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-color: #7c3aed;
+            color: #ffffff;
           }
 
           .mini-map-section.s1 {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.5), rgba(34, 197, 94, 0.7));
-            border-color: rgba(34, 197, 94, 0.8);
-            color: #dcfce7;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-color: #16a34a;
+            color: #ffffff;
           }
 
           .mini-map-section.s2 {
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.5), rgba(168, 85, 247, 0.7));
-            border-color: rgba(168, 85, 247, 0.8);
-            color: #f3e8ff;
+            background: linear-gradient(135deg, #a855f7, #9333ea);
+            border-color: #9333ea;
+            color: #ffffff;
           }
 
           .mini-map-section:hover {
@@ -821,21 +822,65 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
       </style>
 
       {currentStage === 'input' ? (
-        <div className="input-container">
-          <div className="input-header">
-            <h1 className="input-title">SMR.io Enhanced Processor</h1>
-            <p className="input-subtitle">Advanced text analysis with interactive visualization</p>
-          </div>
-          {error && (
-            <div className="error-banner">
-              <strong>Error:</strong> {error}
+        <>
+          {/* Left Sidebar - Mini Map Preview */}
+          <div className="sidebar">
+            <div className="mini-map">
+              <h3 className="mini-map-title">🗺️ Layout Preview</h3>
+              
+              <div className="mini-map-grid">
+                {/* Original Text Row */}
+                <div className="mini-map-row">
+                  <div className="mini-map-section original-text">
+                    ORIGINAL TEXT
+                  </div>
+                </div>
+                
+                {/* Fragments Row */}
+                <div className="mini-map-row">
+                  <div className="mini-map-section f1">
+                    F1
+                  </div>
+                  <div className="mini-map-section f2">
+                    F2
+                  </div>
+                </div>
+                
+                {/* Summaries Row */}
+                <div className="mini-map-row">
+                  <div className="mini-map-section s2">
+                    S2
+                  </div>
+                  <div className="mini-map-section s1">
+                    S1
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '8px', fontSize: '12px', color: '#94a3b8', textAlign: 'center' }}>
+                Click sections to navigate after processing starts
+              </div>
             </div>
-          )}
-          <TextInput
-            onSubmit={handleStartProcessing}
-            disabled={false}
-          />
-        </div>
+          </div>
+
+          <div className="main-body" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="input-container">
+              <div className="input-header">
+                <h1 className="input-title">SMR.io Enhanced Processor</h1>
+                <p className="input-subtitle">Advanced text analysis with interactive visualization</p>
+              </div>
+              {error && (
+                <div className="error-banner">
+                  <strong>Error:</strong> {error}
+                </div>
+              )}
+              <TextInput
+                onSubmit={handleStartProcessing}
+                disabled={false}
+              />
+            </div>
+          </div>
+        </>
       ) : (
         <>
           {/* Left Sidebar - Mini Map */}
