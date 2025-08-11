@@ -33,7 +33,8 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 
   // UI state for highlighting
   const [hoveredFragment, setHoveredFragment] = useState<Fragment | null>(null);
-  const [highlightedRanges, setHighlightedRanges] = useState<Array<{start: number, end: number, type: 'fragment' | 'sentence'}>>([]);
+  const [originalTextHighlights, setOriginalTextHighlights] = useState<Array<{start: number, end: number, type: 'fragment' | 'sentence'}>>([]);
+  const [s1SummaryHighlights, setS1SummaryHighlights] = useState<Array<{start: number, end: number, type: 'fragment' | 'sentence'}>>([]);
 
   // Refs for scrolling and path drawing
   const mainBodyRef = useRef<HTMLDivElement>(null);
@@ -219,15 +220,17 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
     setHoveredFragment(fragment);
     
     if (!fragment) {
-      setHighlightedRanges([]);
+      setOriginalTextHighlights([]);
+      setS1SummaryHighlights([]);
       return;
     }
 
-    const ranges: Array<{start: number, end: number, type: 'fragment' | 'sentence'}> = [];
+    const originalTextRanges: Array<{start: number, end: number, type: 'fragment' | 'sentence'}> = [];
+    const s1SummaryRanges: Array<{start: number, end: number, type: 'fragment' | 'sentence'}> = [];
 
-    // Highlight the fragment itself if it has position info
+    // Highlight the fragment itself in the original text if it has position info
     if (fragment.start_position !== null && fragment.end_position !== null) {
-      ranges.push({
+      originalTextRanges.push({
         start: fragment.start_position,
         end: fragment.end_position,
         type: 'fragment'
@@ -237,11 +240,11 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
       scrollToPosition(fragment.start_position);
     }
 
-    // For F2 fragments, also highlight the related sentence in S1
+    // For F2 fragments, also highlight the related sentence in S1 summary
     if (fragment.related_sentence && s1Summary) {
       const sentenceStart = s1Summary.indexOf(fragment.related_sentence);
       if (sentenceStart !== -1) {
-        ranges.push({
+        s1SummaryRanges.push({
           start: sentenceStart,
           end: sentenceStart + fragment.related_sentence.length,
           type: 'sentence'
@@ -249,7 +252,8 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
       }
     }
 
-    setHighlightedRanges(ranges);
+    setOriginalTextHighlights(originalTextRanges);
+    setS1SummaryHighlights(s1SummaryRanges);
   };
 
   /**
@@ -301,18 +305,22 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
     setVerificationSummary(null);
     setLoadingStages(new Set());
     setHoveredFragment(null);
-    setHighlightedRanges([]);
+    setOriginalTextHighlights([]);
+    setS1SummaryHighlights([]);
   };
 
   /**
-   * Render highlighted text with ranges.
+   * Render highlighted text with specific ranges.
    */
-  const renderHighlightedText = (text: string): JSX.Element => {
-    if (highlightedRanges.length === 0) {
+  const renderHighlightedText = (
+    text: string, 
+    ranges: Array<{start: number, end: number, type: 'fragment' | 'sentence'}>
+  ): JSX.Element => {
+    if (ranges.length === 0) {
       return <span>{text}</span>;
     }
 
-    const sortedRanges = [...highlightedRanges].sort((a, b) => a.start - b.start);
+    const sortedRanges = [...ranges].sort((a, b) => a.start - b.start);
     const elements: JSX.Element[] = [];
     let lastIndex = 0;
 
@@ -956,7 +964,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               </div>
               <div className="scrollable-content" ref={originalTextRef}>
                 <div style={{ lineHeight: '1.8', fontSize: '14px', whiteSpace: 'pre-wrap' }}>
-                  {originalText ? renderHighlightedText(originalText) : 'No text loaded'}
+                  {originalText ? renderHighlightedText(originalText, originalTextHighlights) : 'No text loaded'}
                 </div>
               </div>
             </div>
@@ -1048,7 +1056,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                 <div className="scrollable-content" ref={s1ContainerRef}>
                   {s1Summary ? (
                     <div style={{ lineHeight: '1.6', fontSize: '14px' }}>
-                      {renderHighlightedText(s1Summary)}
+                      {renderHighlightedText(s1Summary, s1SummaryHighlights)}
                     </div>
                   ) : (
                     <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>
