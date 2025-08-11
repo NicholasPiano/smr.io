@@ -372,16 +372,15 @@ export default function ProgressiveTextProcessor(): JSX.Element {
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              hover: {
-                backgroundColor: 'rgba(239, 68, 68, 0.2)'
-              }
+              justifyContent: 'center'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+              const target = e.target as HTMLElement;
+              target.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'transparent';
+              const target = e.target as HTMLElement;
+              target.style.backgroundColor = 'transparent';
             }}
             title="Dismiss error"
           >

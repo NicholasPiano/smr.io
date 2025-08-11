@@ -5,8 +5,7 @@
 import type { 
   ProcessTextResponse, 
   ProcessingStatusResponse, 
-  ProcessingResult,
-  ApiError 
+  ProcessingResult 
 } from '../types/api';
 
 const API_BASE_URL = 'http://localhost:8001/api';

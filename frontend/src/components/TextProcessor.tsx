@@ -86,7 +86,7 @@ export default function TextProcessor(): JSX.Element {
         <div data-testid="text-input-section">
           <TextInput
             onSubmit={handleSubmitText}
-            disabled={status === 'processing'}
+            disabled={status !== 'idle'}
           />
         </div>
       )}
