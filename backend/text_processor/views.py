@@ -25,17 +25,13 @@ logger = logging.getLogger(__name__)
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def process_text(request):
+def start_processing(request):
     """
-    Process text through the complete analysis pipeline.
+    Start text processing and generate the primary summary (S1).
 
-    This endpoint accepts text input and triggers the full processing workflow:
-    1. Validates input text
-    2. Creates a TextSubmission record
-    3. Triggers async processing (returns immediately with job ID)
-    4. Returns the submission ID for status checking
+    This creates a new TextSubmission and immediately generates the S1 summary.
 
-    POST /api/text/process/
+    POST /api/text/start/
 
     Request body:
     {
@@ -45,8 +41,9 @@ def process_text(request):
     Response:
     {
         "submission_id": "uuid-string",
-        "status": "pending",
-        "message": "Text processing started"
+        "status": "s1_completed",
+        "s1_summary": "Primary summary content...",
+        "created_at": "2024-01-01T12:00:00Z"
     }
     """
     serializer = TextSubmissionCreateSerializer(data=request.data)
@@ -62,46 +59,266 @@ def process_text(request):
         submission = TextSubmission.objects.create(
             original_text=serializer.validated_data["text"]
         )
+        submission.start_processing()
 
         logger.info(f"Created new text submission: {submission.id}")
 
-        # Start processing (in a real production environment, this would be async)
-        # For this demo, we'll process synchronously but return the job ID immediately
-        try:
-            processor = TextProcessor()
-            # Process the text submission
-            processor.process_text_submission(str(submission.id))
+        # Generate S1 summary
+        processor = TextProcessor()
+        s1_summary = processor.generate_s1_summary(str(submission.id))
 
-            return Response(
-                {
-                    "submission_id": str(submission.id),
-                    "status": "completed",
-                    "message": "Text processing completed successfully",
-                },
-                status=status.HTTP_201_CREATED,
-            )
-
-        except Exception as processing_error:
-            logger.error(
-                f"Processing failed for submission {submission.id}: {str(processing_error)}"
-            )
-
-            # Mark submission as failed
-            submission.mark_failed(str(processing_error))
-
-            return Response(
-                {
-                    "submission_id": str(submission.id),
-                    "status": "failed",
-                    "error": str(processing_error),
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        return Response(
+            {
+                "submission_id": str(submission.id),
+                "status": "s1_completed",
+                "s1_summary": s1_summary.content,
+                "created_at": submission.created_at.isoformat(),
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
     except Exception as e:
-        logger.error(f"Failed to create text submission: {str(e)}")
+        logger.error(f"Failed to start processing: {str(e)}")
+        if "submission" in locals():
+            submission.mark_failed(str(e))
         return Response(
-            {"error": "Failed to create text submission", "details": str(e)},
+            {"error": "Failed to start processing", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def extract_f1_fragments(request, submission_id):
+    """
+    Extract F1 fragments from the original text.
+
+    POST /api/text/{submission_id}/extract-f1/
+
+    Response:
+    {
+        "submission_id": "uuid-string",
+        "status": "f1_completed",
+        "f1_fragments": [
+            {
+                "id": "uuid",
+                "sequence_number": 1,
+                "content": "Fragment content...",
+                "verified": true,
+                "start_position": 10,
+                "end_position": 50
+            }
+        ]
+    }
+    """
+    try:
+        submission = get_object_or_404(TextSubmission, id=submission_id)
+
+        if submission.status == "failed":
+            return Response(
+                {"error": "Cannot process failed submission"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        processor = TextProcessor()
+        f1_fragments = processor.extract_f1_fragments(str(submission.id))
+
+        # Serialize fragments
+        fragments_data = []
+        for fragment in f1_fragments:
+            fragments_data.append(
+                {
+                    "id": str(fragment.id),
+                    "sequence_number": fragment.sequence_number,
+                    "content": fragment.content,
+                    "verified": fragment.verified,
+                    "start_position": fragment.start_position,
+                    "end_position": fragment.end_position,
+                    "created_at": fragment.created_at.isoformat(),
+                }
+            )
+
+        return Response(
+            {
+                "submission_id": str(submission.id),
+                "status": "f1_completed",
+                "f1_fragments": fragments_data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to extract F1 fragments for {submission_id}: {str(e)}")
+        return Response(
+            {"error": "Failed to extract F1 fragments", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def generate_s2_summary(request, submission_id):
+    """
+    Generate S2 summary based on F1 fragments.
+
+    POST /api/text/{submission_id}/generate-s2/
+
+    Response:
+    {
+        "submission_id": "uuid-string",
+        "status": "s2_completed",
+        "s2_summary": "Secondary summary content..."
+    }
+    """
+    try:
+        submission = get_object_or_404(TextSubmission, id=submission_id)
+
+        if submission.status == "failed":
+            return Response(
+                {"error": "Cannot process failed submission"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        processor = TextProcessor()
+        s2_summary = processor.generate_s2_summary(str(submission.id))
+
+        return Response(
+            {
+                "submission_id": str(submission.id),
+                "status": "s2_completed",
+                "s2_summary": s2_summary.content,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to generate S2 summary for {submission_id}: {str(e)}")
+        return Response(
+            {"error": "Failed to generate S2 summary", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def extract_f2_fragments(request, submission_id):
+    """
+    Extract F2 justification fragments.
+
+    POST /api/text/{submission_id}/extract-f2/
+
+    Response:
+    {
+        "submission_id": "uuid-string",
+        "status": "f2_completed",
+        "f2_fragments": [
+            {
+                "id": "uuid",
+                "sequence_number": 1,
+                "content": "Fragment content...",
+                "verified": true,
+                "related_sentence": "S1 sentence this justifies...",
+                "start_position": 10,
+                "end_position": 50
+            }
+        ]
+    }
+    """
+    try:
+        submission = get_object_or_404(TextSubmission, id=submission_id)
+
+        if submission.status == "failed":
+            return Response(
+                {"error": "Cannot process failed submission"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        processor = TextProcessor()
+        f2_fragments = processor.extract_f2_fragments(str(submission.id))
+
+        # Serialize fragments
+        fragments_data = []
+        for fragment in f2_fragments:
+            fragments_data.append(
+                {
+                    "id": str(fragment.id),
+                    "sequence_number": fragment.sequence_number,
+                    "content": fragment.content,
+                    "verified": fragment.verified,
+                    "related_sentence": fragment.related_sentence,
+                    "start_position": fragment.start_position,
+                    "end_position": fragment.end_position,
+                    "created_at": fragment.created_at.isoformat(),
+                }
+            )
+
+        return Response(
+            {
+                "submission_id": str(submission.id),
+                "status": "f2_completed",
+                "f2_fragments": fragments_data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to extract F2 fragments for {submission_id}: {str(e)}")
+        return Response(
+            {"error": "Failed to extract F2 fragments", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def complete_verification(request, submission_id):
+    """
+    Complete verification of all fragments and finalize processing.
+
+    POST /api/text/{submission_id}/verify/
+
+    Response:
+    {
+        "submission_id": "uuid-string",
+        "status": "completed",
+        "verification_summary": {
+            "F1_total": 5,
+            "F1_verified": 4,
+            "F1_verification_rate": 0.8,
+            "F2_total": 3,
+            "F2_verified": 3,
+            "F2_verification_rate": 1.0,
+            "overall_verification_rate": 0.875
+        },
+        "processing_completed_at": "2024-01-01T12:00:30Z"
+    }
+    """
+    try:
+        submission = get_object_or_404(TextSubmission, id=submission_id)
+
+        if submission.status == "failed":
+            return Response(
+                {"error": "Cannot process failed submission"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        processor = TextProcessor()
+        verification_summary = processor.complete_verification(str(submission.id))
+
+        return Response(
+            {
+                "submission_id": str(submission.id),
+                "status": "completed",
+                "verification_summary": verification_summary,
+                "processing_completed_at": submission.processing_completed_at.isoformat(),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to complete verification for {submission_id}: {str(e)}")
+        return Response(
+            {"error": "Failed to complete verification", "details": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 

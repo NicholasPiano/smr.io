@@ -8,8 +8,32 @@ from . import views
 app_name = "text_processor"
 
 urlpatterns = [
-    # Main processing endpoints
-    path("text/process/", views.process_text, name="process_text"),
+    # Progressive processing endpoints
+    path("text/start/", views.start_processing, name="start_processing"),
+    path(
+        "text/<uuid:submission_id>/extract-f1/",
+        views.extract_f1_fragments,
+        name="extract_f1_fragments",
+    ),
+    path(
+        "text/<uuid:submission_id>/generate-s2/",
+        views.generate_s2_summary,
+        name="generate_s2_summary",
+    ),
+    path(
+        "text/<uuid:submission_id>/extract-f2/",
+        views.extract_f2_fragments,
+        name="extract_f2_fragments",
+    ),
+    path(
+        "text/<uuid:submission_id>/verify/",
+        views.complete_verification,
+        name="complete_verification",
+    ),
+    # Legacy endpoints (keep for backwards compatibility)
+    path(
+        "text/process/", views.start_processing, name="process_text"
+    ),  # Redirect to new start endpoint
     path(
         "text/status/<uuid:submission_id>/",
         views.get_processing_status,

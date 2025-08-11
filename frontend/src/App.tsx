@@ -1,5 +1,5 @@
 import React from 'react';
-import TextProcessor from './components/TextProcessor';
+import ProgressiveTextProcessor from './components/ProgressiveTextProcessor';
 
 /**
  * Top-level application component.
@@ -41,7 +41,7 @@ function App(): JSX.Element {
           </p>
         </header>
         
-        <TextProcessor />
+        <ProgressiveTextProcessor />
       </div>
     </div>
   );

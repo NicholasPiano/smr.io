@@ -4,6 +4,8 @@
 
 export type SubmissionStatus = 'idle' | 'pending' | 'processing' | 'completed' | 'failed';
 
+export type ProgressiveStage = 'input' | 's1' | 'f1' | 's2' | 'f2' | 'verification' | 'completed' | 'error';
+
 export interface Fragment {
   id: string;
   sequence_number: number;

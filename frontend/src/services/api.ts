@@ -92,7 +92,100 @@ async function apiRequest<T>(
 }
 
 /**
- * Submit text for processing.
+ * Start text processing and get S1 summary.
+ */
+export async function startProcessing(text: string): Promise<{
+  submission_id: string;
+  status: string;
+  s1_summary: string;
+  created_at: string;
+}> {
+  return apiRequest('/text/start/', {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  });
+}
+
+/**
+ * Extract F1 fragments.
+ */
+export async function extractF1Fragments(submissionId: string): Promise<{
+  submission_id: string;
+  status: string;
+  f1_fragments: Array<{
+    id: string;
+    sequence_number: number;
+    content: string;
+    verified: boolean;
+    start_position: number | null;
+    end_position: number | null;
+    created_at: string;
+  }>;
+}> {
+  return apiRequest(`/text/${submissionId}/extract-f1/`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Generate S2 summary.
+ */
+export async function generateS2Summary(submissionId: string): Promise<{
+  submission_id: string;
+  status: string;
+  s2_summary: string;
+}> {
+  return apiRequest(`/text/${submissionId}/generate-s2/`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Extract F2 justification fragments.
+ */
+export async function extractF2Fragments(submissionId: string): Promise<{
+  submission_id: string;
+  status: string;
+  f2_fragments: Array<{
+    id: string;
+    sequence_number: number;
+    content: string;
+    verified: boolean;
+    related_sentence: string;
+    start_position: number | null;
+    end_position: number | null;
+    created_at: string;
+  }>;
+}> {
+  return apiRequest(`/text/${submissionId}/extract-f2/`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Complete verification and finalize processing.
+ */
+export async function completeVerification(submissionId: string): Promise<{
+  submission_id: string;
+  status: string;
+  verification_summary: {
+    F1_total: number;
+    F1_verified: number;
+    F1_verification_rate: number;
+    F2_total: number;
+    F2_verified: number;
+    F2_verification_rate: number;
+    overall_verification_rate: number;
+  };
+  processing_completed_at: string;
+}> {
+  return apiRequest(`/text/${submissionId}/verify/`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Legacy: Submit text for processing (redirects to start processing).
  */
 export async function processText(text: string): Promise<ProcessTextResponse> {
   return apiRequest<ProcessTextResponse>('/text/process/', {
