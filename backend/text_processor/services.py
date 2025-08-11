@@ -10,6 +10,7 @@ import re
 from typing import List, Dict, Any, Tuple
 from django.conf import settings
 import openai
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,14 @@ class OpenAIService:
     def __init__(self):
         """Initialize the OpenAI client with API key from settings."""
         openai.api_key = settings.OPENAI_API_KEY
-        self.client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+
+        # Create explicit httpx client to avoid proxy detection issues
+        # This fixes the "unexpected keyword argument 'proxies'" error
+        http_client = httpx.Client(proxy=None)
+
+        self.client = openai.OpenAI(
+            api_key=settings.OPENAI_API_KEY, http_client=http_client
+        )
 
     def _make_api_call(
         self, messages: List[Dict[str, str]], max_tokens: int = 1000
@@ -126,7 +134,7 @@ class OpenAIService:
             if len(fragments) < 10:
                 # Add empty placeholders if needed (should not happen in practice)
                 fragments.extend(
-                    [f"Fragment {i+1} not extracted"] for i in range(len(fragments), 10)
+                    [f"Fragment {i+1} not extracted" for i in range(len(fragments), 10)]
                 )
             else:
                 # Trim to exactly 10

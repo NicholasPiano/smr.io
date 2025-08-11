@@ -53,7 +53,7 @@ Cypress.Commands.add('checkBackendHealth', () => {
 /**
  * Custom command to wait for real backend processing
  */
-Cypress.Commands.add('waitForRealProcessing', (submissionId: string, maxWaitTime = 120000) => {
+Cypress.Commands.add('waitForRealProcessing', (submissionId: string, maxWaitTime = 30000) => {
   const apiUrl = Cypress.env('API_BASE_URL') || 'http://localhost:8001/api';
   const startTime = Date.now();
   
@@ -98,7 +98,7 @@ Cypress.Commands.add('submitTextForProcessing', (text: string) => {
     body: { text },
     timeout: 15000
   }).then((response) => {
-    expect(response.status).to.eq(200);
+    expect(response.status).to.eq(201);
     expect(response.body).to.have.property('submission_id');
     return response.body.submission_id;
   });
