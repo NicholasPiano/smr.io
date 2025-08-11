@@ -9,7 +9,7 @@ import type {
   ApiError 
 } from '../types/api';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:8001/api';
 
 /**
  * Custom error class for API errors.

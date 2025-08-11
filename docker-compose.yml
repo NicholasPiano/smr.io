@@ -28,14 +28,14 @@ services:
     container_name: smr-backend
     restart: on-failure
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
       - DEBUG=1
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./backend:/app:delegated
       - backend_db:/app/db
-    command: ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+    command: ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8000/health/ >/dev/null 2>&1 || exit 1"]
       interval: 10s

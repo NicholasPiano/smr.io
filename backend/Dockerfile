@@ -25,8 +25,8 @@ COPY . /app/
 # Create directory for SQLite database
 RUN mkdir -p /app/db
 
-# Collect static files
-RUN python manage.py collectstatic --noinput --clear
+# Create directory for static files (collect during runtime instead)
+RUN mkdir -p /app/staticfiles
 
 EXPOSE 8000
 
