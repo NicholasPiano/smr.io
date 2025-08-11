@@ -566,11 +566,13 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           .mini-map-grid {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding: 16px;
-            background: rgba(30, 41, 59, 0.3);
-            border-radius: 12px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            gap: 12px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 16px;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
           }
 
           .mini-map-row {
@@ -580,50 +582,81 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 
           .mini-map-section {
             flex: 1;
-            height: 32px;
-            border-radius: 6px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid rgba(148, 163, 184, 0.4);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 600;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
           }
 
           .mini-map-section.original-text {
             flex: 2; /* Double width for original text */
-            background: rgba(71, 85, 105, 0.4);
-            color: #cbd5e1;
+            background: linear-gradient(135deg, rgba(71, 85, 105, 0.6), rgba(71, 85, 105, 0.8));
+            border-color: rgba(71, 85, 105, 0.8);
+            color: #f1f5f9;
           }
 
           .mini-map-section.f1 {
-            background: rgba(59, 130, 246, 0.3);
-            color: #93c5fd;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(59, 130, 246, 0.7));
+            border-color: rgba(59, 130, 246, 0.8);
+            color: #dbeafe;
           }
 
           .mini-map-section.f2 {
-            background: rgba(139, 92, 246, 0.3);
-            color: #c4b5fd;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(139, 92, 246, 0.7));
+            border-color: rgba(139, 92, 246, 0.8);
+            color: #e4d4ff;
           }
 
           .mini-map-section.s1 {
-            background: rgba(34, 197, 94, 0.3);
-            color: #86efac;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.5), rgba(34, 197, 94, 0.7));
+            border-color: rgba(34, 197, 94, 0.8);
+            color: #dcfce7;
           }
 
           .mini-map-section.s2 {
-            background: rgba(168, 85, 247, 0.3);
-            color: #d8b4fe;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.5), rgba(168, 85, 247, 0.7));
+            border-color: rgba(168, 85, 247, 0.8);
+            color: #f3e8ff;
           }
 
           .mini-map-section:hover {
-            transform: scale(1.05);
-            border-color: rgba(148, 163, 184, 0.4);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+          }
+
+          .mini-map-section.original-text:hover {
+            border-color: rgba(71, 85, 105, 1);
+            background: linear-gradient(135deg, rgba(71, 85, 105, 0.8), rgba(71, 85, 105, 1));
+          }
+
+          .mini-map-section.f1:hover {
+            border-color: rgba(59, 130, 246, 1);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.7), rgba(59, 130, 246, 0.9));
+          }
+
+          .mini-map-section.f2:hover {
+            border-color: rgba(139, 92, 246, 1);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.7), rgba(139, 92, 246, 0.9));
+          }
+
+          .mini-map-section.s1:hover {
+            border-color: rgba(34, 197, 94, 1);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.7), rgba(34, 197, 94, 0.9));
+          }
+
+          .mini-map-section.s2:hover {
+            border-color: rgba(168, 85, 247, 1);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.7), rgba(168, 85, 247, 0.9));
           }
 
           .mini-map-section.loading::after {
