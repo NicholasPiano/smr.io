@@ -362,21 +362,28 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           }
 
           .sidebar {
-            width: 280px;
-            background: rgba(15, 23, 42, 0.8);
-            border-right: 1px solid rgba(148, 163, 184, 0.2);
-            padding: 24px;
+            width: 250px;
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 2px solid rgba(148, 163, 184, 0.3);
+            padding: 20px;
             backdrop-filter: blur(20px);
             overflow-y: auto;
+            position: relative;
           }
 
           .main-body {
             flex: 1;
-            padding: 24px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
+            max-width: calc(100vw - 250px);
+          }
+
+          .main-body.input-stage {
+            align-items: center;
+            justify-content: center;
           }
 
           .content-box {
@@ -552,26 +559,28 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           }
 
           .mini-map {
-            margin-bottom: 32px;
+            margin-bottom: 24px;
           }
 
           .mini-map-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
             color: #f1f5f9;
             text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
 
           .mini-map-grid {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            padding: 24px;
+            gap: 8px;
+            padding: 16px;
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
-            border-radius: 20px;
-            border: 3px solid rgba(148, 163, 184, 0.6);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            border: 2px solid rgba(148, 163, 184, 0.4);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(20px);
           }
 
@@ -582,24 +591,23 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 
           .mini-map-section {
             flex: 1;
-            height: 50px;
-            border-radius: 12px;
-            border: 3px solid;
+            height: 36px;
+            border-radius: 8px;
+            border: 2px solid;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 700;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
           }
 
           .mini-map-section.original-text {
-            flex: 2; /* Double width for original text */
             background: linear-gradient(135deg, #475569, #64748b);
             border-color: #64748b;
             color: #ffffff;
@@ -630,8 +638,8 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           }
 
           .mini-map-section:hover {
-            transform: scale(1.08) translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            transform: scale(1.05) translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             z-index: 10;
           }
 
@@ -660,6 +668,16 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             background: linear-gradient(135deg, rgba(168, 85, 247, 0.7), rgba(168, 85, 247, 0.9));
           }
 
+          .mini-map-section.pending {
+            opacity: 0.5;
+            filter: grayscale(50%);
+          }
+
+          .mini-map-section.loading {
+            position: relative;
+            animation: pulse 1.5s ease-in-out infinite;
+          }
+
           .mini-map-section.loading::after {
             content: '';
             position: absolute;
@@ -667,24 +685,47 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: shimmer 1.5s infinite;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 1.2s infinite;
+          }
+
+          .mini-map-section.completed {
+            position: relative;
           }
 
           .mini-map-section.completed::before {
             content: '✓';
             position: absolute;
             top: 2px;
-            right: 4px;
+            right: 3px;
             font-size: 8px;
-            color: #10b981;
-            background: rgba(16, 185, 129, 0.2);
+            color: #ffffff;
+            background: rgba(16, 185, 129, 0.8);
             border-radius: 50%;
             width: 12px;
             height: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+          }
+
+          /* Fragment-specific completion indicators */
+          .mini-map-section.f1.completed::after,
+          .mini-map-section.f2.completed::after {
+            content: attr(data-verified-count);
+            position: absolute;
+            bottom: 2px;
+            right: 3px;
+            font-size: 7px;
+            color: #ffffff;
+            background: rgba(16, 185, 129, 0.8);
+            border-radius: 8px;
+            padding: 1px 3px;
+            line-height: 1;
+            font-weight: bold;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
           }
 
           .mini-map-verification {
@@ -732,6 +773,11 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             100% { left: 100%; }
           }
 
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+          }
+
           .highlight-fragment {
             background: rgba(59, 130, 246, 0.3);
             border: 1px solid rgba(59, 130, 246, 0.6);
@@ -764,7 +810,8 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100%;
+            width: 100%;
+            max-width: 600px;
           }
 
           .input-header {
@@ -831,28 +878,28 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               <div className="mini-map-grid">
                 {/* Original Text Row */}
                 <div className="mini-map-row">
-                  <div className="mini-map-section original-text">
+                  <div className="mini-map-section original-text pending">
                     ORIGINAL TEXT
                   </div>
                 </div>
                 
                 {/* Fragments Row */}
                 <div className="mini-map-row">
-                  <div className="mini-map-section f1">
-                    F1
+                  <div className="mini-map-section f1 pending">
+                    F1 FRAGMENTS
                   </div>
-                  <div className="mini-map-section f2">
-                    F2
+                  <div className="mini-map-section f2 pending">
+                    F2 FRAGMENTS
                   </div>
                 </div>
                 
                 {/* Summaries Row */}
                 <div className="mini-map-row">
-                  <div className="mini-map-section s2">
-                    S2
+                  <div className="mini-map-section s2 pending">
+                    S2 SUMMARY
                   </div>
-                  <div className="mini-map-section s1">
-                    S1
+                  <div className="mini-map-section s1 pending">
+                    S1 SUMMARY
                   </div>
                 </div>
               </div>
@@ -863,7 +910,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             </div>
           </div>
 
-          <div className="main-body" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="main-body input-stage">
             <div className="input-container">
               <div className="input-header">
                 <h1 className="input-title">SMR.io Enhanced Processor</h1>
@@ -1117,7 +1164,7 @@ function VisualMiniMap({
             onClick={() => { sections[0] && onSectionClick(sections[0].ref); }}
             title="Click to scroll to Original Text"
           >
-            ORIGINAL
+            ORIGINAL TEXT
           </div>
         </div>
         
@@ -1126,16 +1173,18 @@ function VisualMiniMap({
           <div
             className={`mini-map-section f1 ${sections[1]?.status || 'pending'}`}
             onClick={() => { sections[1] && onSectionClick(sections[1].ref); }}
-            title="Click to scroll to F1 Fragments"
+            title={`Click to scroll to F1 Fragments${f1Fragments.length > 0 ? ` (${f1Fragments.filter(f => f.verified).length}/${f1Fragments.length} verified)` : ''}`}
+            data-verified-count={f1Fragments.length > 0 ? `${f1Fragments.filter(f => f.verified).length}/${f1Fragments.length}` : ''}
           >
-            F1
+            F1 FRAGMENTS
           </div>
           <div
             className={`mini-map-section f2 ${sections[2]?.status || 'pending'}`}
             onClick={() => { sections[2] && onSectionClick(sections[2].ref); }}
-            title="Click to scroll to F2 Fragments"
+            title={`Click to scroll to F2 Fragments${f2Fragments.length > 0 ? ` (${f2Fragments.filter(f => f.verified).length}/${f2Fragments.length} verified)` : ''}`}
+            data-verified-count={f2Fragments.length > 0 ? `${f2Fragments.filter(f => f.verified).length}/${f2Fragments.length}` : ''}
           >
-            F2
+            F2 FRAGMENTS
           </div>
         </div>
         
@@ -1146,14 +1195,14 @@ function VisualMiniMap({
             onClick={() => { sections[3] && onSectionClick(sections[3].ref); }}
             title="Click to scroll to S2 Summary"
           >
-            S2
+            S2 SUMMARY
           </div>
           <div
             className={`mini-map-section s1 ${sections[4]?.status || 'pending'}`}
             onClick={() => { sections[4] && onSectionClick(sections[4].ref); }}
             title="Click to scroll to S1 Summary"
           >
-            S1
+            S1 SUMMARY
           </div>
         </div>
       </div>
