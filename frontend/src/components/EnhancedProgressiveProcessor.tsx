@@ -36,6 +36,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   const [highlightedRanges, setHighlightedRanges] = useState<Array<{start: number, end: number, type: 'fragment' | 'sentence'}>>([]);
 
   // Refs for scrolling and path drawing
+  const mainBodyRef = useRef<HTMLDivElement>(null);
   const originalTextRef = useRef<HTMLDivElement>(null);
   const f1ContainerRef = useRef<HTMLDivElement>(null);
   const f2ContainerRef = useRef<HTMLDivElement>(null);
@@ -268,6 +269,24 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   };
 
   /**
+   * Scroll to a specific section in the main body.
+   */
+  const scrollToSection = (sectionRef: React.RefObject<HTMLDivElement>): void => {
+    if (!mainBodyRef.current || !sectionRef.current) return;
+
+    const mainBodyRect = mainBodyRef.current.getBoundingClientRect();
+    const sectionRect = sectionRef.current.getBoundingClientRect();
+    
+    // Calculate the scroll position to bring the section into view
+    const scrollTop = mainBodyRef.current.scrollTop + (sectionRect.top - mainBodyRect.top) - 20; // 20px offset
+    
+    mainBodyRef.current.scrollTo({
+      top: scrollTop,
+      behavior: 'smooth'
+    });
+  };
+
+  /**
    * Reset the component to initial state.
    */
   const handleReset = (): void => {
@@ -354,7 +373,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           .main-body {
             flex: 1;
             padding: 24px;
-            overflow: hidden;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -541,71 +560,142 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             font-weight: 600;
             margin-bottom: 16px;
             color: #f1f5f9;
+            text-align: center;
           }
 
-          .mini-map-item {
+          .mini-map-grid {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: rgba(30, 41, 59, 0.4);
-            border-radius: 8px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            flex-direction: column;
+            gap: 8px;
+            padding: 16px;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
           }
 
-          .mini-map-item.active {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.4);
+          .mini-map-row {
+            display: flex;
+            gap: 8px;
           }
 
-          .mini-map-item.completed {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: rgba(16, 185, 129, 0.3);
-          }
-
-          .mini-map-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
+          .mini-map-section {
+            flex: 1;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            flex-shrink: 0;
-          }
-
-          .mini-map-icon.pending {
-            background: rgba(107, 114, 128, 0.3);
-            border: 2px solid #374151;
-            color: #9ca3af;
-          }
-
-          .mini-map-icon.loading {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            border: 2px solid #3b82f6;
-            color: white;
-          }
-
-          .mini-map-icon.completed {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border: 2px solid #10b981;
-            color: white;
-          }
-
-          .mini-map-content {
-            flex: 1;
-          }
-
-          .mini-map-label {
-            font-size: 14px;
+            font-size: 10px;
             font-weight: 500;
-            margin-bottom: 2px;
+            position: relative;
+            overflow: hidden;
           }
 
-          .mini-map-detail {
+          .mini-map-section.original-text {
+            flex: 2; /* Double width for original text */
+            background: rgba(71, 85, 105, 0.4);
+            color: #cbd5e1;
+          }
+
+          .mini-map-section.f1 {
+            background: rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+          }
+
+          .mini-map-section.f2 {
+            background: rgba(139, 92, 246, 0.3);
+            color: #c4b5fd;
+          }
+
+          .mini-map-section.s1 {
+            background: rgba(34, 197, 94, 0.3);
+            color: #86efac;
+          }
+
+          .mini-map-section.s2 {
+            background: rgba(168, 85, 247, 0.3);
+            color: #d8b4fe;
+          }
+
+          .mini-map-section:hover {
+            transform: scale(1.05);
+            border-color: rgba(148, 163, 184, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          }
+
+          .mini-map-section.loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 1.5s infinite;
+          }
+
+          .mini-map-section.completed::before {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 8px;
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .mini-map-verification {
+            margin-top: 12px;
+            padding: 8px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 6px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+          }
+
+          .mini-map-verification-title {
             font-size: 12px;
+            font-weight: 500;
             color: #94a3b8;
+            margin-bottom: 4px;
+          }
+
+          .mini-map-verification-stats {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+          }
+
+          .mini-map-verification-stat {
+            flex: 1;
+            text-align: center;
+            padding: 4px;
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 4px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+          }
+
+          .mini-map-verification-stat.f1 {
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+          }
+
+          .mini-map-verification-stat.f2 {
+            border-color: rgba(139, 92, 246, 0.3);
+            color: #c4b5fd;
+          }
+
+          @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
           }
 
           .highlight-fragment {
@@ -717,17 +807,23 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
         <>
           {/* Left Sidebar - Mini Map */}
           <div className="sidebar">
-            <MiniMap
+            <VisualMiniMap
               currentStage={currentStage}
               loadingStages={loadingStages}
               f1Fragments={f1Fragments}
               f2Fragments={f2Fragments}
               verificationSummary={verificationSummary}
+              onSectionClick={scrollToSection}
+              originalTextRef={originalTextRef}
+              f1ContainerRef={f1ContainerRef}
+              f2ContainerRef={f2ContainerRef}
+              s1ContainerRef={s1ContainerRef}
+              s2ContainerRef={s2ContainerRef}
             />
           </div>
 
           {/* Right Main Body */}
-          <div className="main-body">
+          <div className="main-body" ref={mainBodyRef}>
             {/* Original Text Box */}
             <div className="content-box original-text-box">
               <div className="box-header">
@@ -852,89 +948,152 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 }
 
 /**
- * Mini-map sidebar component showing processing progress
+ * Visual mini-map sidebar component showing layout structure
  */
-interface MiniMapProps {
+interface VisualMiniMapProps {
   currentStage: ProgressiveStage;
   loadingStages: Set<ProgressiveStage>;
   f1Fragments: Fragment[];
   f2Fragments: Fragment[];
   verificationSummary: VerificationSummary | null;
+  onSectionClick: (sectionRef: React.RefObject<HTMLDivElement>) => void;
+  originalTextRef: React.RefObject<HTMLDivElement>;
+  f1ContainerRef: React.RefObject<HTMLDivElement>;
+  f2ContainerRef: React.RefObject<HTMLDivElement>;
+  s1ContainerRef: React.RefObject<HTMLDivElement>;
+  s2ContainerRef: React.RefObject<HTMLDivElement>;
 }
 
-function MiniMap({ 
+function VisualMiniMap({ 
   currentStage, 
   loadingStages, 
   f1Fragments, 
   f2Fragments, 
-  verificationSummary 
-}: MiniMapProps): JSX.Element {
-  const stages = [
-    { 
-      key: 'f1', 
-      label: 'F1 Fragment Extraction', 
-      icon: '🔍',
-      detail: f1Fragments.length > 0 ? `${f1Fragments.filter(f => f.verified).length}/${f1Fragments.length} verified` : 'Extracting fragments...'
-    },
-    { 
-      key: 's2', 
-      label: 'S2 Secondary Summary', 
-      icon: '📋',
-      detail: 'From extracted fragments'
-    },
-    { 
-      key: 's1', 
-      label: 'S1 Primary Summary', 
-      icon: '📝',
-      detail: 'From original text'
-    },
-    { 
-      key: 'f2', 
-      label: 'F2 Justification Fragments', 
-      icon: '⚖️',
-      detail: f2Fragments.length > 0 ? `${f2Fragments.filter(f => f.verified).length}/${f2Fragments.length} verified` : 'Finding justifications...'
-    },
-    { 
-      key: 'verification', 
-      label: 'Final Verification', 
-      icon: '✅',
-      detail: verificationSummary ? `${Math.round(verificationSummary.overall_verification_rate * 100)}% success` : 'Verifying fragments...'
-    }
-  ];
-
-  const getStageStatus = (stageKey: string): 'pending' | 'loading' | 'completed' => {
-    if (loadingStages.has(stageKey as ProgressiveStage)) {
+  verificationSummary,
+  onSectionClick,
+  originalTextRef,
+  f1ContainerRef,
+  f2ContainerRef,
+  s1ContainerRef,
+  s2ContainerRef
+}: VisualMiniMapProps): JSX.Element {
+  const getSectionStatus = (sectionKey: string): 'pending' | 'loading' | 'completed' => {
+    if (loadingStages.has(sectionKey as ProgressiveStage)) {
       return 'loading';
     }
     
     const stageOrder = ['input', 'f1', 's2', 's1', 'f2', 'verification', 'completed'];
     const currentIndex = stageOrder.indexOf(currentStage);
-    const stageIndex = stageOrder.indexOf(stageKey);
+    const sectionIndex = stageOrder.indexOf(sectionKey);
     
-    return stageIndex < currentIndex ? 'completed' : 'pending';
+    return sectionIndex < currentIndex ? 'completed' : 'pending';
   };
+
+  const sections = [
+    { 
+      key: 'original-text', 
+      label: 'Original Text', 
+      ref: originalTextRef,
+      status: currentStage !== 'input' ? 'completed' : 'pending',
+      className: 'original-text'
+    },
+    { 
+      key: 'f1', 
+      label: 'F1', 
+      ref: f1ContainerRef,
+      status: getSectionStatus('f1'),
+      className: 'f1'
+    },
+    { 
+      key: 'f2', 
+      label: 'F2', 
+      ref: f2ContainerRef,
+      status: getSectionStatus('f2'),
+      className: 'f2'
+    },
+    { 
+      key: 's2', 
+      label: 'S2', 
+      ref: s2ContainerRef,
+      status: getSectionStatus('s2'),
+      className: 's2'
+    },
+    { 
+      key: 's1', 
+      label: 'S1', 
+      ref: s1ContainerRef,
+      status: getSectionStatus('s1'),
+      className: 's1'
+    }
+  ];
 
   return (
     <div className="mini-map">
-      <h3 className="mini-map-title">📊 Processing Progress</h3>
+      <h3 className="mini-map-title">🗺️ Layout Map</h3>
       
-      {stages.map((stage) => {
-        const status = getStageStatus(stage.key);
-        return (
+      <div className="mini-map-grid">
+        {/* Original Text Row */}
+        <div className="mini-map-row">
           <div
-            key={stage.key}
-            className={`mini-map-item ${status}`}
+            className={`mini-map-section original-text ${sections[0]?.status || 'pending'}`}
+            onClick={() => { sections[0] && onSectionClick(sections[0].ref); }}
+            title="Click to scroll to Original Text"
           >
-            <div className={`mini-map-icon ${status}`}>
-              {status === 'completed' ? '✓' : status === 'loading' ? '⏳' : stage.icon}
+            ORIGINAL
+          </div>
+        </div>
+        
+        {/* Fragments Row */}
+        <div className="mini-map-row">
+          <div
+            className={`mini-map-section f1 ${sections[1]?.status || 'pending'}`}
+            onClick={() => { sections[1] && onSectionClick(sections[1].ref); }}
+            title="Click to scroll to F1 Fragments"
+          >
+            F1
+          </div>
+          <div
+            className={`mini-map-section f2 ${sections[2]?.status || 'pending'}`}
+            onClick={() => { sections[2] && onSectionClick(sections[2].ref); }}
+            title="Click to scroll to F2 Fragments"
+          >
+            F2
+          </div>
+        </div>
+        
+        {/* Summaries Row */}
+        <div className="mini-map-row">
+          <div
+            className={`mini-map-section s2 ${sections[3]?.status || 'pending'}`}
+            onClick={() => { sections[3] && onSectionClick(sections[3].ref); }}
+            title="Click to scroll to S2 Summary"
+          >
+            S2
+          </div>
+          <div
+            className={`mini-map-section s1 ${sections[4]?.status || 'pending'}`}
+            onClick={() => { sections[4] && onSectionClick(sections[4].ref); }}
+            title="Click to scroll to S1 Summary"
+          >
+            S1
+          </div>
+        </div>
+      </div>
+
+      {/* Verification Statistics */}
+      {verificationSummary && (
+        <div className="mini-map-verification">
+          <div className="mini-map-verification-title">Verification Stats</div>
+          <div className="mini-map-verification-stats">
+            <div className="mini-map-verification-stat f1">
+              F1: {Math.round(verificationSummary.F1_verification_rate * 100)}%
             </div>
-            <div className="mini-map-content">
-              <div className="mini-map-label">{stage.label}</div>
-              <div className="mini-map-detail">{stage.detail}</div>
+            <div className="mini-map-verification-stat f2">
+              F2: {Math.round(verificationSummary.F2_verification_rate * 100)}%
             </div>
           </div>
-        );
-      })}
+        </div>
+      )}
     </div>
   );
 }
