@@ -206,6 +206,28 @@ export default function ProgressiveTextProcessor(): JSX.Element {
     setLoadingStages(new Set());
   };
 
+  /**
+   * Dismiss error and restore UI to last successful stage.
+   */
+  const handleDismissError = (): void => {
+    setError(null);
+    
+    // Determine the last successful stage based on what data we have
+    if (verificationSummary) {
+      setCurrentStage('completed');
+    } else if (f2Fragments.length > 0) {
+      setCurrentStage('f2');
+    } else if (s2Summary) {
+      setCurrentStage('s2');
+    } else if (f1Fragments.length > 0) {
+      setCurrentStage('f1');
+    } else if (s1Summary) {
+      setCurrentStage('s1');
+    } else {
+      setCurrentStage('input');
+    }
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -329,25 +351,72 @@ export default function ProgressiveTextProcessor(): JSX.Element {
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
             border: '1px solid rgba(239, 68, 68, 0.3)',
             borderRadius: '8px',
-            color: '#fca5a5'
+            color: '#fca5a5',
+            position: 'relative'
           }}
         >
-          <h3 style={{ margin: '0 0 8px 0', color: '#ef4444' }}>Error</h3>
-          <p style={{ margin: 0 }}>{error}</p>
           <button
-            onClick={handleReset}
+            onClick={handleDismissError}
             style={{
-              marginTop: '12px',
-              padding: '8px 16px',
-              backgroundColor: '#ef4444',
-              color: 'white',
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              background: 'none',
               border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer'
+              color: '#ef4444',
+              cursor: 'pointer',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              hover: {
+                backgroundColor: 'rgba(239, 68, 68, 0.2)'
+              }
             }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+            }}
+            title="Dismiss error"
           >
-            Try Again
+            ×
           </button>
+          <h3 style={{ margin: '0 0 8px 0', color: '#ef4444', paddingRight: '32px' }}>Error</h3>
+          <p style={{ margin: '0 0 12px 0', paddingRight: '32px' }}>{error}</p>
+          <div style={{ display: 'flex', gap: '8px', paddingRight: '32px' }}>
+            <button
+              onClick={handleReset}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Try Again
+            </button>
+            <button
+              onClick={handleDismissError}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'transparent',
+                color: '#ef4444',
+                border: '1px solid #ef4444',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 
