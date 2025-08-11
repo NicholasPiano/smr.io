@@ -301,6 +301,13 @@ class TextProcessor:
             f1_objects = []
             with transaction.atomic():
                 for i, fragment_content in enumerate(f1_fragments, 1):
+                    # Skip empty or placeholder fragments
+                    if not fragment_content or (
+                        fragment_content.strip().startswith("Fragment")
+                        and "not extracted" in fragment_content
+                    ):
+                        continue
+
                     fragment = Fragment.objects.create(
                         submission=submission,
                         fragment_type="F1",

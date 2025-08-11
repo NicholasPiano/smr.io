@@ -129,16 +129,15 @@ class OpenAIService:
         fragments = self._parse_numbered_list(response, expected_count=10)
 
         if len(fragments) != 10:
-            logger.warning(f"Expected 10 fragments, got {len(fragments)}. Adjusting...")
-            # If we don't have exactly 10, pad or trim as needed
-            if len(fragments) < 10:
-                # Add empty placeholders if needed (should not happen in practice)
-                fragments.extend(
-                    [f"Fragment {i+1} not extracted" for i in range(len(fragments), 10)]
-                )
-            else:
-                # Trim to exactly 10
+            logger.warning(
+                f"Expected 10 fragments, got {len(fragments)}. Using what we have..."
+            )
+            # If we don't have exactly 10, use what we have (don't pad with fake fragments)
+            if len(fragments) > 10:
+                # Trim to exactly 10 if we got more than expected
                 fragments = fragments[:10]
+            # If we have fewer than 10, that's fine - just use what we got
+            # Don't pad with placeholder text that can't be verified
 
         return fragments
 
@@ -230,7 +229,7 @@ class OpenAIService:
             expected_count: Expected number of items (optional)
 
         Returns:
-            List[str]: List of parsed items without numbers
+            List[str]: List of parsed items without numbers and quotes
         """
         lines = text.strip().split("\n")
         fragments = []
@@ -243,10 +242,16 @@ class OpenAIService:
             # Match patterns like "1. ", "1) ", "1: ", etc.
             match = re.match(r"^\d+[\.\)\:]\s*(.+)", line)
             if match:
-                fragments.append(match.group(1).strip())
+                fragment = match.group(1).strip()
+                # Remove surrounding quotes if present
+                fragment = re.sub(r'^["\'](.+)["\']$', r"\1", fragment)
+                fragments.append(fragment)
             elif line and not re.match(r"^\d+[\.\)\:]?\s*$", line):
                 # If it's not empty and not just a number, include it
-                fragments.append(line)
+                fragment = line.strip()
+                # Remove surrounding quotes if present
+                fragment = re.sub(r'^["\'](.+)["\']$', r"\1", fragment)
+                fragments.append(fragment)
 
         return fragments
 
