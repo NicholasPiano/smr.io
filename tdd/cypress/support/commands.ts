@@ -31,6 +31,95 @@ Cypress.Commands.add('submitTestText', (text?: string) => {
   cy.get('[data-testid="submit-button"]').click();
 });
 
+/**
+ * Custom command to check backend health
+ */
+Cypress.Commands.add('checkBackendHealth', () => {
+  const backendUrl = Cypress.env('BACKEND_URL') || 'http://localhost:8001';
+  
+  cy.request({
+    method: 'GET',
+    url: `${backendUrl}/health/`,
+    failOnStatusCode: false,
+    timeout: 10000
+  }).then((response) => {
+    if (response.status !== 200) {
+      throw new Error(`Backend health check failed: ${response.status} - ${response.statusText}`);
+    }
+    expect(response.body).to.have.property('status', 'healthy');
+  });
+});
+
+/**
+ * Custom command to wait for real backend processing
+ */
+Cypress.Commands.add('waitForRealProcessing', (submissionId: string, maxWaitTime = 120000) => {
+  const apiUrl = Cypress.env('API_BASE_URL') || 'http://localhost:8001/api';
+  const startTime = Date.now();
+  
+  function checkStatus(): void {
+    if (Date.now() - startTime > maxWaitTime) {
+      throw new Error(`Processing timeout after ${maxWaitTime}ms`);
+    }
+    
+    cy.request({
+      method: 'GET',
+      url: `${apiUrl}/text/status/${submissionId}/`,
+      timeout: 10000
+    }).then((response) => {
+      const status = response.body.status;
+      
+      if (status === 'completed') {
+        // Processing complete
+        return;
+      } else if (status === 'failed') {
+        throw new Error(`Processing failed: ${response.body.error || 'Unknown error'}`);
+      } else {
+        // Still processing, wait and check again
+        cy.wait(2000).then(() => {
+          checkStatus();
+        });
+      }
+    });
+  }
+  
+  checkStatus();
+});
+
+/**
+ * Custom command to submit text and get submission ID for tracking
+ */
+Cypress.Commands.add('submitTextForProcessing', (text: string) => {
+  const apiUrl = Cypress.env('API_BASE_URL') || 'http://localhost:8001/api';
+  
+  return cy.request({
+    method: 'POST',
+    url: `${apiUrl}/text/process/`,
+    body: { text },
+    timeout: 15000
+  }).then((response) => {
+    expect(response.status).to.eq(200);
+    expect(response.body).to.have.property('submission_id');
+    return response.body.submission_id;
+  });
+});
+
+/**
+ * Custom command to get processing results
+ */
+Cypress.Commands.add('getProcessingResults', (submissionId: string) => {
+  const apiUrl = Cypress.env('API_BASE_URL') || 'http://localhost:8001/api';
+  
+  return cy.request({
+    method: 'GET',
+    url: `${apiUrl}/text/results/${submissionId}/`,
+    timeout: 10000
+  }).then((response) => {
+    expect(response.status).to.eq(200);
+    return response.body;
+  });
+});
+
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -49,6 +138,30 @@ declare global {
        * @param text Optional custom text to submit
        */
       submitTestText(text?: string): Chainable<void>;
+      
+      /**
+       * Check if backend is healthy and accessible
+       */
+      checkBackendHealth(): Chainable<void>;
+      
+      /**
+       * Wait for real backend processing to complete
+       * @param submissionId The submission ID to track
+       * @param maxWaitTime Maximum time to wait in milliseconds
+       */
+      waitForRealProcessing(submissionId: string, maxWaitTime?: number): Chainable<void>;
+      
+      /**
+       * Submit text directly to backend API and return submission ID
+       * @param text The text to process
+       */
+      submitTextForProcessing(text: string): Chainable<string>;
+      
+      /**
+       * Get processing results from backend API
+       * @param submissionId The submission ID
+       */
+      getProcessingResults(submissionId: string): Chainable<any>;
     }
   }
 }
