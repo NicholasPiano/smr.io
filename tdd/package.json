@@ -1,0 +1,17 @@
+{
+  "name": "smr-tdd",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.1.21",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:chrome": "cypress run --browser chrome",
+    "test": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^13.13.1",
+    "typescript": "^5.5.4"
+  }
+}
