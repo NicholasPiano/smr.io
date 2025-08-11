@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+When running a docker command in the background with "-d", checks the relevant logs and cancel and restart if there is an error.
