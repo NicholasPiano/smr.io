@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/creativeprogressiveprocessor.tsx","./src/components/processingstatus.tsx","./src/components/progressivetextprocessor.tsx","./src/components/resultsdisplay.tsx","./src/components/textinput.tsx","./src/components/textprocessor.tsx","./src/services/api.ts","./src/types/api.ts"],"version":"5.9.2"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/creativeprogressiveprocessor.tsx","./src/components/textinput.tsx","./src/services/api.ts","./src/types/api.ts"],"version":"5.9.2"}
