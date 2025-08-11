@@ -362,10 +362,10 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           }
 
           .sidebar {
-            width: 250px;
+            width: 360px;
             background: rgba(15, 23, 42, 0.95);
             border-right: 2px solid rgba(148, 163, 184, 0.3);
-            padding: 20px;
+            padding: 24px;
             backdrop-filter: blur(20px);
             overflow-y: auto;
             position: relative;
@@ -378,7 +378,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             display: flex;
             flex-direction: column;
             gap: 16px;
-            max-width: calc(100vw - 250px);
+            max-width: calc(100vw - 360px);
           }
 
           .main-body.input-stage {
@@ -399,14 +399,14 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 
           .original-text-box {
             height: 35%;
-            min-height: 300px;
+            min-height: 600px;
           }
 
           .content-row {
             display: flex;
             gap: 20px;
             height: 32.5%;
-            min-height: 250px;
+            min-height: 500px;
           }
 
           .content-row .content-box {
@@ -575,8 +575,8 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           .mini-map-grid {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding: 16px;
+            gap: 12px;
+            padding: 20px;
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
             border-radius: 12px;
             border: 2px solid rgba(148, 163, 184, 0.4);
@@ -586,12 +586,12 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 
           .mini-map-row {
             display: flex;
-            gap: 8px;
+            gap: 12px;
           }
 
           .mini-map-section {
             flex: 1;
-            height: 36px;
+            height: 64px;
             border-radius: 8px;
             border: 2px solid;
             cursor: pointer;
