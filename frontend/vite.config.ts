@@ -11,6 +11,28 @@ export default defineConfig({
     watch: {
       usePolling: true
     }
+  },
+  define: {
+    // Ensure import.meta.env.PROD is properly set
+    'import.meta.env.PROD': JSON.stringify(process.env.NODE_ENV === 'production')
+  },
+  build: {
+    // Production build optimizations
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          utils: ['./src/utils/similarity.ts']
+        }
+      }
+    }
   }
 });
 

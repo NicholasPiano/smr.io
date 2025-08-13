@@ -1,0 +1,23 @@
+# Copy this file to terraform.tfvars and fill in your values
+
+# AWS Configuration
+aws_region                = "eu-west-2"
+aws_access_key_id        = "YOUR_AWS_ACCESS_KEY_ID"
+aws_secret_access_key    = "YOUR_AWS_SECRET_ACCESS_KEY"
+
+# Domain Configuration  
+domain_name              = "llmsmr.io"
+letsencrypt_email        = "admin@llmsmr.io"
+
+# API Keys
+openai_api_key          = "sk-..."
+
+# SSH Configuration
+ssh_public_key_path     = "~/.ssh/id_rsa.pub"
+allowed_ssh_cidr        = "YOUR_IP/32"  # Restrict to your IP for security
+
+# Infrastructure
+instance_type           = "t3.medium"
+
+# Repository
+github_repo_url         = "https://github.com/NicholasPiano/smr.io.git"

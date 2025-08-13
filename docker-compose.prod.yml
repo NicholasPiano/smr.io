@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  # Backend service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smr-backend
+    restart: unless-stopped
+    environment:
+      - DEBUG=False
+      - DJANGO_SETTINGS_MODULE=smr_backend.settings
+      - ALLOWED_HOSTS=${DOMAIN_NAME},www.${DOMAIN_NAME}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - ./logs:/app/logs
+      - db_data:/app/db
+    networks:
+      - app-network
+    expose:
+      - "8000"
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - NODE_ENV=production
+        - VITE_API_URL=/api
+    container_name: smr-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - frontend_dist:/usr/share/nginx/html
+    networks:
+      - app-network
+
+  # Nginx reverse proxy
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: smr-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/sites-available:/etc/nginx/sites-available:ro
+      - frontend_dist:/usr/share/nginx/html:ro
+      - certbot_www:/var/www/certbot:ro
+      - certbot_certs:/etc/letsencrypt:ro
+      - ./logs/nginx:/var/log/nginx
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    networks:
+      - app-network
+    depends_on:
+      - backend
+      - frontend
+
+  # SSL Certificate Management
+  certbot:
+    image: certbot/certbot:latest
+    container_name: smr-certbot
+    restart: "no"
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_certs:/etc/letsencrypt
+      - ./logs/certbot:/var/log/letsencrypt
+    environment:
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    entrypoint: ""
+    command:
+      - sh
+      - -c
+      - |
+        echo "Waiting for nginx to start..."
+        sleep 30
+        
+        echo "Obtaining SSL certificates..."
+        certbot certonly \
+          --webroot \
+          --webroot-path=/var/www/certbot \
+          --email "$${LETSENCRYPT_EMAIL}" \
+          --agree-tos \
+          --no-eff-email \
+          --non-interactive \
+          -d "$${DOMAIN_NAME}" \
+          -d "www.$${DOMAIN_NAME}"
+        
+        if [ $$? -eq 0 ]; then
+          echo "SSL certificates obtained successfully"
+          echo "Reloading nginx..."
+          docker exec smr-nginx nginx -s reload
+        else
+          echo "Failed to obtain SSL certificates"
+        fi
+    networks:
+      - app-network
+    depends_on:
+      - nginx
+
+  # Certificate renewal daemon
+  certbot-renewal:
+    image: certbot/certbot:latest
+    container_name: smr-certbot-renewal
+    restart: unless-stopped
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_certs:/etc/letsencrypt
+      - ./logs/certbot:/var/log/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    entrypoint: ""
+    command:
+      - sh
+      - -c
+      - |
+        # Install docker CLI for nginx reloading
+        apk add --no-cache docker-cli
+        
+        echo "Starting certificate renewal daemon..."
+        while true; do
+          echo "Checking for certificate renewal..."
+          certbot renew --webroot --webroot-path=/var/www/certbot --quiet
+          if [ $$? -eq 0 ]; then
+            echo "Certificate renewed successfully, reloading nginx..."
+            docker exec smr-nginx nginx -s reload || echo "Failed to reload nginx"
+          fi
+          echo "Sleeping for 12 hours..."
+          sleep 43200  # 12 hours
+        done
+    networks:
+      - app-network
+    depends_on:
+      - nginx
+
+volumes:
+  db_data:
+    driver: local
+  frontend_dist:
+    driver: local
+  certbot_www:
+    driver: local
+  certbot_certs:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

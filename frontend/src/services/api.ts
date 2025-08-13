@@ -8,7 +8,10 @@ import type {
   ProcessingResult 
 } from '../types/api';
 
-const API_BASE_URL = 'http://localhost:8001/api';
+// API base URL - use relative path in production for nginx proxy
+const API_BASE_URL = import.meta.env.PROD 
+  ? '/api'  // Production: use nginx reverse proxy
+  : 'http://localhost:8001/api';  // Development: direct backend connection
 
 /**
  * Custom error class for API errors.
