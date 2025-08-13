@@ -21,10 +21,18 @@ print_error() { echo -e "${RED}✗ $1${NC}"; }
 print_warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
 print_info() { echo -e "${BLUE}ℹ $1${NC}"; }
 
+# Check arguments
+FORCE_REFRESH=false
+if [ "$1" = "--force-refresh" ]; then
+    FORCE_REFRESH=true
+    shift
+fi
+
 # Check if PUBLIC_IP is provided
 if [ -z "$1" ]; then
-    print_error "Usage: $0 <PUBLIC_IP>"
+    print_error "Usage: $0 [--force-refresh] <PUBLIC_IP>"
     print_info "Example: $0 54.123.456.789"
+    print_info "Example: $0 --force-refresh 54.123.456.789  (clears all caches)"
     print_info "You can find the PUBLIC_IP in your Terraform outputs:"
     print_info "  cd terraform && terraform output instance_public_ip"
     exit 1
@@ -69,10 +77,33 @@ ssh -i "$SSH_KEY" ubuntu@"$PUBLIC_IP" << 'EOF'
     git checkout main
     
     echo "📥 Pulling latest changes..."
+    BEFORE_PULL=$(git rev-parse HEAD)
     git pull origin main
+    AFTER_PULL=$(git rev-parse HEAD)
+    
+    # Check if frontend files changed
+    FRONTEND_CHANGED=false
+    if [ "$BEFORE_PULL" != "$AFTER_PULL" ]; then
+        if git diff --name-only $BEFORE_PULL $AFTER_PULL | grep -q "^frontend/"; then
+            FRONTEND_CHANGED=true
+            echo "🔄 Frontend changes detected - will refresh build cache"
+        fi
+    fi
     
     echo "🔨 Building and starting updated services..."
-    sudo docker-compose -f docker-compose.prod.yml up -d --build
+    if [ "$FRONTEND_CHANGED" = true ] || [ "$FORCE_REFRESH" = true ]; then
+        if [ "$FORCE_REFRESH" = true ]; then
+            echo "🧹 Force refresh enabled - cleaning all caches..."
+        else
+            echo "🧹 Frontend changes detected - cleaning frontend volume..."
+        fi
+        sudo docker-compose -f docker-compose.prod.yml down
+        sudo docker volume rm smrio_frontend_dist 2>/dev/null || echo "Volume already removed or doesn't exist"
+        sudo docker-compose -f docker-compose.prod.yml build --no-cache frontend
+        sudo docker-compose -f docker-compose.prod.yml up -d
+    else
+        sudo docker-compose -f docker-compose.prod.yml up -d --build
+    fi
     
     echo "⏳ Waiting for services to start..."
     sleep 10
@@ -81,6 +112,13 @@ ssh -i "$SSH_KEY" ubuntu@"$PUBLIC_IP" << 'EOF'
     sudo docker-compose -f docker-compose.prod.yml ps
     
     echo "✅ Update complete!"
+    
+    # Troubleshooting info
+    echo ""
+    echo "🔧 Troubleshooting:"
+    echo "   - If frontend assets seem stale, run: sudo docker volume rm smrio_frontend_dist"
+    echo "   - If builds are cached, add --no-cache: sudo docker-compose build --no-cache"
+    echo "   - Check container contents: docker exec smr-frontend ls -la /usr/share/nginx/html/assets/"
 EOF
 
 if [ $? -eq 0 ]; then
