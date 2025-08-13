@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { TextInput } from './TextInput';
 import { 
   startProcessing, 
@@ -59,29 +59,58 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   const s1SectionRef = useRef<HTMLDivElement>(null);
 
   /**
-   * Handle scroll events to manage S1 sticky behavior.
+   * Handle scroll events to manage S1 sticky behavior with throttling.
    */
   useEffect(() => {
+    let rafId: number | null = null;
+    let isScrolling = false;
+
     const handleScroll = (): void => {
-      if (!summaryColumnRef.current || !s1SectionRef.current) return;
+      if (isScrolling) return;
+      
+      isScrolling = true;
+      rafId = requestAnimationFrame(() => {
+        if (!summaryColumnRef.current || !s1SectionRef.current) {
+          isScrolling = false;
+          return;
+        }
 
-      const summaryColumn = summaryColumnRef.current;
-      const s1Section = s1SectionRef.current;
-      const scrollTop = summaryColumn.scrollTop;
-      const s1OffsetTop = s1Section.offsetTop - summaryColumn.offsetTop;
-
-      // Make S1 sticky when scrolled past its original position
-      setIsS1Sticky(scrollTop > s1OffsetTop);
+        const summaryColumn = summaryColumnRef.current;
+        const s1Section = s1SectionRef.current;
+        const scrollTop = summaryColumn.scrollTop;
+        
+        // Calculate threshold more accurately - account for F1 and S2 sections
+        const f1Section = summaryColumn.querySelector('.summary-section:nth-child(1)');
+        const s2Section = summaryColumn.querySelector('.summary-section:nth-child(2)');
+        
+        let threshold = 0;
+        if (f1Section && !collapsedSections.has('f1')) {
+          threshold += (f1Section as HTMLElement).offsetHeight;
+        }
+        if (s2Section && !collapsedSections.has('s2')) {
+          threshold += (s2Section as HTMLElement).offsetHeight;
+        }
+        
+        // Add some buffer to prevent flickering at the exact boundary
+        const buffer = 10;
+        const shouldBeSticky = scrollTop > (threshold - buffer);
+        
+        setIsS1Sticky(shouldBeSticky);
+        isScrolling = false;
+      });
     };
 
     const summaryColumn = summaryColumnRef.current;
     if (summaryColumn) {
-      summaryColumn.addEventListener('scroll', handleScroll);
+      summaryColumn.addEventListener('scroll', handleScroll, { passive: true });
       return () => {
         summaryColumn.removeEventListener('scroll', handleScroll);
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+        }
       };
     }
-  }, [currentStage]); // Re-run when stage changes as content layout may change
+  }, [currentStage, collapsedSections]); // Re-run when stage or collapsed sections change
 
   /**
    * Start the progressive processing workflow with the new loading order.
@@ -481,6 +510,20 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   };
 
   /**
+   * Memoized S1 section className to prevent unnecessary re-renders.
+   */
+  const s1SectionClassName = useMemo(() => {
+    const classes = ['content-box', 'summary-section'];
+    if (collapsedSections.has('s1')) {
+      classes.push('collapsed');
+    }
+    if (isS1Sticky) {
+      classes.push('sticky');
+    }
+    return classes.join(' ');
+  }, [collapsedSections, isS1Sticky]);
+
+  /**
    * Render highlighted text with specific ranges.
    */
   const renderHighlightedText = (
@@ -608,6 +651,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             backdrop-filter: blur(20px);
             border: 2px solid rgba(34, 197, 94, 0.3);
             background: rgba(15, 23, 42, 0.95);
+            transition: box-shadow 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
           }
 
           .summary-section.sticky::before {
@@ -987,7 +1031,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             {/* S1 Primary Summary */}
             <div 
               ref={s1SectionRef}
-              className={`content-box summary-section ${collapsedSections.has('s1') ? 'collapsed' : ''} ${isS1Sticky ? 'sticky' : ''}`}
+              className={s1SectionClassName}
             >
               <div className="box-header">
                 <h2 className="box-title">📝 S1 Primary Summary</h2>
