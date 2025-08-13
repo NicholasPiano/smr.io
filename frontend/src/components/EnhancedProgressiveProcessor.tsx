@@ -46,12 +46,42 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   // Collapsed sections state
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
+  // Sticky S1 state
+  const [isS1Sticky, setIsS1Sticky] = useState<boolean>(false);
+
   // Refs for scrolling
   const originalTextRef = useRef<HTMLDivElement>(null);
   const f1ContainerRef = useRef<HTMLDivElement>(null);
   const f2ContainerRef = useRef<HTMLDivElement>(null);
   const s1ContainerRef = useRef<HTMLDivElement>(null);
   const s2ContainerRef = useRef<HTMLDivElement>(null);
+  const summaryColumnRef = useRef<HTMLDivElement>(null);
+  const s1SectionRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Handle scroll events to manage S1 sticky behavior.
+   */
+  useEffect(() => {
+    const handleScroll = (): void => {
+      if (!summaryColumnRef.current || !s1SectionRef.current) return;
+
+      const summaryColumn = summaryColumnRef.current;
+      const s1Section = s1SectionRef.current;
+      const scrollTop = summaryColumn.scrollTop;
+      const s1OffsetTop = s1Section.offsetTop - summaryColumn.offsetTop;
+
+      // Make S1 sticky when scrolled past its original position
+      setIsS1Sticky(scrollTop > s1OffsetTop);
+    };
+
+    const summaryColumn = summaryColumnRef.current;
+    if (summaryColumn) {
+      summaryColumn.addEventListener('scroll', handleScroll);
+      return () => {
+        summaryColumn.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, [currentStage]); // Re-run when stage changes as content layout may change
 
   /**
    * Start the progressive processing workflow with the new loading order.
@@ -447,6 +477,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
     setOriginalTextHighlights([]);
     setS1SummaryHighlights([]);
     setCollapsedSections(new Set());
+    setIsS1Sticky(false);
   };
 
   /**
@@ -567,6 +598,28 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 
           .summary-section.collapsed .scrollable-content {
             display: none;
+          }
+
+          .summary-section.sticky {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(34, 197, 94, 0.3);
+            background: rgba(15, 23, 42, 0.95);
+          }
+
+          .summary-section.sticky::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.1));
+            border-radius: 14px;
+            z-index: -1;
           }
 
           .box-header {
@@ -869,7 +922,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           </div>
 
           {/* Right Column - Summary Sections (F1, S2, S1, F2) */}
-          <div className="summary-column">
+          <div className="summary-column" ref={summaryColumnRef}>
             {/* F1 Fragments */}
             <div className={`content-box summary-section ${collapsedSections.has('f1') ? 'collapsed' : ''}`}>
               <div className="box-header">
@@ -932,7 +985,10 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             </div>
 
             {/* S1 Primary Summary */}
-            <div className={`content-box summary-section ${collapsedSections.has('s1') ? 'collapsed' : ''}`}>
+            <div 
+              ref={s1SectionRef}
+              className={`content-box summary-section ${collapsedSections.has('s1') ? 'collapsed' : ''} ${isS1Sticky ? 'sticky' : ''}`}
+            >
               <div className="box-header">
                 <h2 className="box-title">📝 S1 Primary Summary</h2>
                 {loadingStages.has('s1') && <div className="loading-indicator" />}
