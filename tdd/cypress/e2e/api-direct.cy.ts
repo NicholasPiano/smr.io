@@ -173,36 +173,36 @@ describe('Direct API Tests', () => {
     it('should return complete results for processed submission', () => {
       cy.getProcessingResults(submissionId).then((results) => {
         // Verify overall structure
-        expect(results).to.have.property('submission');
+        expect(results).to.have.property('submission_id');
         expect(results).to.have.property('summaries');
         expect(results).to.have.property('fragments');
-        expect(results).to.have.property('verification');
+        expect(results).to.have.property('verification_summary');
 
         // Verify submission details
-        expect(results.submission).to.have.property('id', submissionId);
-        expect(results.submission).to.have.property('status', 'completed');
-        expect(results.submission).to.have.property('original_text', SAMPLE_TEXT);
+        expect(results).to.have.property('submission_id', submissionId);
+        expect(results).to.have.property('status', 'completed');
+        expect(results).to.have.property('original_text', SAMPLE_TEXT);
 
         // Verify summaries
-        expect(results.summaries).to.have.property('primary');
-        expect(results.summaries).to.have.property('secondary');
-        expect(results.summaries.primary).to.have.property('content');
-        expect(results.summaries.primary.content).to.be.a('string');
-        expect(results.summaries.primary.content).to.have.length.greaterThan(10);
-        expect(results.summaries.secondary).to.have.property('content');
-        expect(results.summaries.secondary.content).to.be.a('string');
-        expect(results.summaries.secondary.content).to.have.length.greaterThan(10);
+        expect(results.summaries).to.have.property('S1');
+        expect(results.summaries).to.have.property('S2');
+        expect(results.summaries.S1).to.have.property('content');
+        expect(results.summaries.S1.content).to.be.a('string');
+        expect(results.summaries.S1.content).to.have.length.greaterThan(10);
+        expect(results.summaries.S2).to.have.property('content');
+        expect(results.summaries.S2.content).to.be.a('string');
+        expect(results.summaries.S2.content).to.have.length.greaterThan(10);
 
         // Verify fragments
-        expect(results.fragments).to.have.property('primary');
-        expect(results.fragments).to.have.property('justification');
-        expect(results.fragments.primary).to.be.an('array');
-        expect(results.fragments.primary).to.have.length.greaterThan(0);
-        expect(results.fragments.justification).to.be.an('array');
-        expect(results.fragments.justification).to.have.length.greaterThan(0);
+        expect(results.fragments).to.have.property('F1');
+        expect(results.fragments).to.have.property('F2');
+        expect(results.fragments.F1).to.be.an('array');
+        expect(results.fragments.F1).to.have.length.greaterThan(0);
+        expect(results.fragments.F2).to.be.an('array');
+        expect(results.fragments.F2).to.have.length.greaterThan(0);
 
         // Verify fragment structure
-        results.fragments.primary.forEach((fragment: any) => {
+        results.fragments.F1.forEach((fragment: any) => {
           expect(fragment).to.have.property('content');
           expect(fragment).to.have.property('start_position');
           expect(fragment).to.have.property('end_position');
@@ -217,20 +217,27 @@ describe('Direct API Tests', () => {
         });
 
         // Verify verification summary
-        expect(results.verification).to.have.property('total_fragments');
-        expect(results.verification).to.have.property('verified_fragments');
-        expect(results.verification).to.have.property('verification_rate');
-        expect(results.verification.total_fragments).to.be.a('number');
-        expect(results.verification.verified_fragments).to.be.a('number');
-        expect(results.verification.verification_rate).to.be.a('number');
-        expect(results.verification.verification_rate).to.be.within(0, 1);
+        expect(results.verification_summary).to.have.property('F1_total');
+        expect(results.verification_summary).to.have.property('F1_verified');
+        expect(results.verification_summary).to.have.property('F1_verification_rate');
+        expect(results.verification_summary).to.have.property('F2_total');
+        expect(results.verification_summary).to.have.property('F2_verified');
+        expect(results.verification_summary).to.have.property('F2_verification_rate');
+        expect(results.verification_summary).to.have.property('overall_verification_rate');
+        expect(results.verification_summary.F1_total).to.be.a('number');
+        expect(results.verification_summary.F1_verified).to.be.a('number');
+        expect(results.verification_summary.F1_verification_rate).to.be.within(0, 1);
+        expect(results.verification_summary.F2_total).to.be.a('number');
+        expect(results.verification_summary.F2_verified).to.be.a('number');
+        expect(results.verification_summary.F2_verification_rate).to.be.within(0, 1);
+        expect(results.verification_summary.overall_verification_rate).to.be.within(0, 1);
       });
     });
 
     it('should include similarity scores for all fragments', () => {
       cy.getProcessingResults(submissionId).then((results) => {
         // Verify F1 fragments have similarity scores
-        results.fragments.primary.forEach((fragment: any) => {
+        results.fragments.F1.forEach((fragment: any) => {
           expect(fragment).to.have.property('similarity_score');
           expect(fragment.similarity_score).to.be.a('number');
           expect(fragment.similarity_score).to.be.within(0, 100);
@@ -242,15 +249,15 @@ describe('Direct API Tests', () => {
         });
 
         // Verify F2 fragments have similarity scores
-        results.fragments.justification.forEach((fragment: any) => {
+        results.fragments.F2.forEach((fragment: any) => {
           expect(fragment).to.have.property('similarity_score');
           expect(fragment.similarity_score).to.be.a('number');
           expect(fragment.similarity_score).to.be.within(0, 100);
         });
 
         // Calculate average similarity for logging
-        const f1Scores = results.fragments.primary.map((f: any) => f.similarity_score);
-        const f2Scores = results.fragments.justification.map((f: any) => f.similarity_score);
+        const f1Scores = results.fragments.F1.map((f: any) => f.similarity_score);
+        const f2Scores = results.fragments.F2.map((f: any) => f.similarity_score);
         const avgF1 = f1Scores.reduce((a: number, b: number) => a + b, 0) / f1Scores.length;
         const avgF2 = f2Scores.reduce((a: number, b: number) => a + b, 0) / f2Scores.length;
         
@@ -355,9 +362,9 @@ describe('Direct API Tests', () => {
         cy.waitForRealProcessing(submissionId, 120000);
         
         cy.getProcessingResults(submissionId).then((results) => {
-          expect(results.submission.status).to.eq('completed');
-          expect(results.summaries.primary.content).to.have.length.greaterThan(20);
-          expect(results.fragments.primary).to.have.length.greaterThan(0);
+          expect(results.status).to.eq('completed');
+          expect(results.summaries.S1.content).to.have.length.greaterThan(20);
+          expect(results.fragments.F1).to.have.length.greaterThan(0);
         });
       });
     });

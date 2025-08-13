@@ -116,6 +116,7 @@ export async function extractF1Fragments(submissionId: string): Promise<{
     sequence_number: number;
     content: string;
     verified: boolean;
+    similarity_score: number;
     start_position: number | null;
     end_position: number | null;
     created_at: string;
@@ -150,6 +151,7 @@ export async function extractF2Fragments(submissionId: string): Promise<{
     sequence_number: number;
     content: string;
     verified: boolean;
+    similarity_score: number;
     related_sentence: string;
     start_position: number | null;
     end_position: number | null;
