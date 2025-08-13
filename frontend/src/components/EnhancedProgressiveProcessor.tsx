@@ -256,6 +256,9 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           end: sentenceStart + fragment.related_sentence.length,
           type: 'sentence'
         });
+        
+        // Auto-scroll S1 summary to bring the related sentence into view
+        scrollToS1Position(sentenceStart);
       }
     }
 
@@ -264,19 +267,147 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   };
 
   /**
-   * Scroll to a specific position in the original text.
+   * Scroll to a specific character position in a text container using DOM Range API.
    */
   const scrollToPosition = (position: number): void => {
     if (!originalTextRef.current) return;
 
-    // Create a temporary element to measure text position
-    const textContent = originalTextRef.current.textContent || '';
-    const beforeText = textContent.substring(0, position);
-    const lines = beforeText.split('\n').length;
-    const lineHeight = 24; // Approximate line height
-    const targetScrollTop = (lines - 1) * lineHeight - 100; // Offset for better visibility
+    try {
+      // Get the text content and find the text node containing our position
+      const walker = document.createTreeWalker(
+        originalTextRef.current,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
 
-    originalTextRef.current.scrollTop = Math.max(0, targetScrollTop);
+      let currentPosition = 0;
+      let targetNode: Text | null = null;
+      let targetOffset = 0;
+
+      let node: Text | null = walker.nextNode() as Text;
+      while (node) {
+        const nodeLength = node.textContent?.length || 0;
+        
+        if (currentPosition + nodeLength >= position) {
+          targetNode = node;
+          targetOffset = position - currentPosition;
+          break;
+        }
+        
+        currentPosition += nodeLength;
+        node = walker.nextNode() as Text;
+      }
+
+      if (!targetNode) {
+        // Fallback: scroll to the bottom if position not found
+        originalTextRef.current.scrollTop = originalTextRef.current.scrollHeight;
+        return;
+      }
+
+      // Create a range at the target position
+      const range = document.createRange();
+      range.setStart(targetNode, Math.min(targetOffset, targetNode.textContent?.length || 0));
+      range.collapse(true);
+
+      // Create a temporary element to get the position
+      const tempElement = document.createElement('span');
+      tempElement.style.position = 'absolute';
+      tempElement.style.visibility = 'hidden';
+      range.insertNode(tempElement);
+
+      // Calculate scroll position with offset for better visibility
+      const elementTop = tempElement.offsetTop;
+      const containerHeight = originalTextRef.current.clientHeight;
+      const targetScrollTop = elementTop - (containerHeight / 3); // Center in upper third
+
+      // Clean up the temporary element
+      tempElement.remove();
+
+      // Smooth scroll to the position
+      originalTextRef.current.scrollTo({
+        top: Math.max(0, targetScrollTop),
+        behavior: 'smooth'
+      });
+
+    } catch (error) {
+      console.warn('Error scrolling to position:', error);
+      // Fallback to simple scrolling
+      const textContent = originalTextRef.current.textContent || '';
+      const beforeText = textContent.substring(0, position);
+      const lines = beforeText.split('\n').length;
+      const lineHeight = 24;
+      const targetScrollTop = (lines - 1) * lineHeight - 100;
+      originalTextRef.current.scrollTop = Math.max(0, targetScrollTop);
+    }
+  };
+
+  /**
+   * Scroll to a specific character position in the S1 summary container.
+   */
+  const scrollToS1Position = (position: number): void => {
+    if (!s1ContainerRef.current) return;
+
+    try {
+      // Get the text content and find the text node containing our position
+      const walker = document.createTreeWalker(
+        s1ContainerRef.current,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+
+      let currentPosition = 0;
+      let targetNode: Text | null = null;
+      let targetOffset = 0;
+
+      let node: Text | null = walker.nextNode() as Text;
+      while (node) {
+        const nodeLength = node.textContent?.length || 0;
+        
+        if (currentPosition + nodeLength >= position) {
+          targetNode = node;
+          targetOffset = position - currentPosition;
+          break;
+        }
+        
+        currentPosition += nodeLength;
+        node = walker.nextNode() as Text;
+      }
+
+      if (!targetNode) {
+        // Fallback: scroll to the bottom if position not found
+        s1ContainerRef.current.scrollTop = s1ContainerRef.current.scrollHeight;
+        return;
+      }
+
+      // Create a range at the target position
+      const range = document.createRange();
+      range.setStart(targetNode, Math.min(targetOffset, targetNode.textContent?.length || 0));
+      range.collapse(true);
+
+      // Create a temporary element to get the position
+      const tempElement = document.createElement('span');
+      tempElement.style.position = 'absolute';
+      tempElement.style.visibility = 'hidden';
+      range.insertNode(tempElement);
+
+      // Calculate scroll position with offset for better visibility
+      const elementTop = tempElement.offsetTop;
+      const containerHeight = s1ContainerRef.current.clientHeight;
+      const targetScrollTop = elementTop - (containerHeight / 3); // Center in upper third
+
+      // Clean up the temporary element
+      tempElement.remove();
+
+      // Smooth scroll to the position
+      s1ContainerRef.current.scrollTo({
+        top: Math.max(0, targetScrollTop),
+        behavior: 'smooth'
+      });
+
+    } catch (error) {
+      console.warn('Error scrolling S1 to position:', error);
+      // Fallback: no scrolling rather than error
+    }
   };
 
   /**
