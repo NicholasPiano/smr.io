@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { TextInput } from './TextInput';
 import logoSvg from '../assets/logo.svg';
+import { useMobile } from '../contexts/MobileContext';
 import { 
   startProcessing, 
   extractF1Fragments, 
@@ -23,6 +24,9 @@ import {
  * - Right main body: Original text + fragments + summaries
  */
 export default function EnhancedProgressiveProcessor(): JSX.Element {
+  // Mobile context
+  const { isMobile, isTablet } = useMobile();
+  
   // Processing state
   const [currentStage, setCurrentStage] = useState<ProgressiveStage>('input');
   const [submissionId, setSubmissionId] = useState<string | null>(null);
@@ -47,7 +51,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   // Collapsed sections state
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
-  // Sticky S1 state
+  // Sticky S1 state (disabled on mobile)
   const [isS1Sticky, setIsS1Sticky] = useState<boolean>(false);
 
   // Refs for scrolling
@@ -61,8 +65,15 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 
   /**
    * Handle scroll events to manage S1 sticky behavior with throttling.
+   * Disabled on mobile devices for better performance and UX.
    */
   useEffect(() => {
+    // Disable sticky behavior on mobile
+    if (isMobile) {
+      setIsS1Sticky(false);
+      return;
+    }
+
     let rafId: number | null = null;
     let isScrolling = false;
 
@@ -111,7 +122,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
         }
       };
     }
-  }, [currentStage, collapsedSections]); // Re-run when stage or collapsed sections change
+  }, [currentStage, collapsedSections, isMobile]); // Re-run when stage, collapsed sections, or mobile state changes
 
   /**
    * Start the progressive processing workflow with the new loading order.
@@ -518,11 +529,12 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
     if (collapsedSections.has('s1')) {
       classes.push('collapsed');
     }
-    if (isS1Sticky) {
+    // Only apply sticky class on non-mobile devices
+    if (isS1Sticky && !isMobile) {
       classes.push('sticky');
     }
     return classes.join(' ');
-  }, [collapsedSections, isS1Sticky]);
+  }, [collapsedSections, isS1Sticky, isMobile]);
 
   /**
    * Render highlighted text with specific ranges.
@@ -573,7 +585,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   };
 
   return (
-    <div className="enhanced-processor">
+    <div className={`enhanced-processor ${isMobile ? 'mobile' : ''}`}>
       <style>
         {`
           .enhanced-processor {
@@ -584,11 +596,22 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
           }
 
+          .enhanced-processor.mobile {
+            min-height: 100vh;
+            height: auto;
+            background-attachment: fixed;
+          }
+
           .processing-layout {
             display: flex;
             flex-direction: column;
             height: 100vh;
             width: 100%;
+          }
+
+          .processing-layout.mobile {
+            min-height: 100vh;
+            height: auto;
           }
 
           .processing-header {
@@ -613,12 +636,26 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             width: 100%;
           }
 
+          .side-layout.mobile {
+            flex-direction: column;
+            min-height: calc(100vh - 65px);
+            height: auto;
+          }
+
           .original-text-column {
             width: 50%;
             padding: 20px;
             border-right: 2px solid rgba(148, 163, 184, 0.3);
             display: flex;
             flex-direction: column;
+          }
+
+          .original-text-column.mobile {
+            width: 100%;
+            border-right: none;
+            border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+            padding: 16px;
+            max-height: 40vh;
           }
 
           .summary-column {
@@ -630,12 +667,58 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             gap: 16px;
           }
 
+          .summary-column.mobile {
+            width: 100%;
+            padding: 16px;
+            overflow-y: visible;
+            gap: 12px;
+          }
+
+          /* Mobile-specific content box adjustments */
+          .mobile .content-box {
+            padding: 16px;
+            margin-bottom: 12px;
+          }
+
+          .mobile .box-header {
+            padding-bottom: 12px;
+          }
+
+          .mobile .box-title {
+            font-size: 18px;
+          }
+
+          .mobile .scrollable-content {
+            max-height: none;
+          }
+
+          .mobile .original-text-box .scrollable-content {
+            max-height: 30vh;
+            overflow-y: auto;
+          }
+
+          /* Mobile processing header adjustments */
+          .mobile .processing-header {
+            padding: 8px 16px;
+          }
+
+          .mobile .processing-logo {
+            height: 32px;
+          }
+
           .main-body.input-stage {
             align-items: center;
             justify-content: center;
             width: 100%;
             height: 100vh;
             display: flex;
+            padding: 20px;
+          }
+
+          .main-body.input-stage.mobile {
+            padding: 16px;
+            min-height: 100vh;
+            height: auto;
           }
 
           .content-box {
@@ -771,6 +854,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             flex: 1;
             overflow-y: auto;
             padding-right: 8px;
+            min-height: 0;
           }
 
           .scrollable-content::-webkit-scrollbar {
@@ -979,7 +1063,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
       </style>
 
       {currentStage === 'input' ? (
-        <div className="main-body input-stage">
+        <div className={`main-body input-stage ${isMobile ? 'mobile' : ''}`}>
           <div className="input-container">
             <div className="input-header">
               <div className="logo-header">
@@ -1000,15 +1084,15 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="processing-layout">
+        <div className={`processing-layout ${isMobile ? 'mobile' : ''}`}>
           {/* Processing Header */}
           <div className="processing-header">
             <img src={logoSvg} alt="SMR.io" className="processing-logo" />
           </div>
           
-          <div className="side-layout">
+          <div className={`side-layout ${isMobile ? 'mobile' : ''}`}>
           {/* Left Column - Original Text */}
-          <div className="original-text-column">
+          <div className={`original-text-column ${isMobile ? 'mobile' : ''}`}>
             <div className="content-box original-text-box">
               <div className="box-header">
                 <h2 className="box-title">📄 Your Text</h2>
@@ -1022,7 +1106,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           </div>
 
           {/* Right Column - Summary Sections (F1, S2, S1, F2) */}
-          <div className="summary-column" ref={summaryColumnRef}>
+          <div className={`summary-column ${isMobile ? 'mobile' : ''}`} ref={summaryColumnRef}>
             {/* F1 Fragments */}
             <div className={`content-box summary-section ${collapsedSections.has('f1') ? 'collapsed' : ''}`}>
               <div className="box-header">
