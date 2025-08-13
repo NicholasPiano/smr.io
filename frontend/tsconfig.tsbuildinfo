@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/creativeprogressiveprocessor.tsx","./src/components/enhancedprogressiveprocessor.tsx","./src/components/textinput.tsx","./src/services/api.ts","./src/types/api.ts"],"version":"5.9.2"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/creativeprogressiveprocessor.tsx","./src/components/enhancedprogressiveprocessor.tsx","./src/components/textinput.tsx","./src/services/api.ts","./src/types/api.ts","./src/utils/similarity.ts"],"version":"5.9.2"}

@@ -43,8 +43,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   const [originalTextHighlights, setOriginalTextHighlights] = useState<Array<{start: number, end: number, type: 'fragment' | 'sentence'}>>([]);
   const [s1SummaryHighlights, setS1SummaryHighlights] = useState<Array<{start: number, end: number, type: 'fragment' | 'sentence'}>>([]);
 
-  // Refs for scrolling and path drawing
-  const mainBodyRef = useRef<HTMLDivElement>(null);
+  // Refs for scrolling
   const originalTextRef = useRef<HTMLDivElement>(null);
   const f1ContainerRef = useRef<HTMLDivElement>(null);
   const f2ContainerRef = useRef<HTMLDivElement>(null);
@@ -410,23 +409,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
     }
   };
 
-  /**
-   * Scroll to a specific section in the main body.
-   */
-  const scrollToSection = (sectionRef: React.RefObject<HTMLDivElement>): void => {
-    if (!mainBodyRef.current || !sectionRef.current) return;
 
-    const mainBodyRect = mainBodyRef.current.getBoundingClientRect();
-    const sectionRect = sectionRef.current.getBoundingClientRect();
-    
-    // Calculate the scroll position to bring the section into view
-    const scrollTop = mainBodyRef.current.scrollTop + (sectionRect.top - mainBodyRect.top) - 20; // 20px offset
-    
-    mainBodyRef.current.scrollTo({
-      top: scrollTop,
-      behavior: 'smooth'
-    });
-  };
 
   /**
    * Reset the component to initial state.
@@ -507,29 +490,35 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
           }
 
-          .sidebar {
-            width: 360px;
-            background: rgba(15, 23, 42, 0.95);
-            border-right: 2px solid rgba(148, 163, 184, 0.3);
-            padding: 24px;
-            backdrop-filter: blur(20px);
-            overflow-y: auto;
-            position: relative;
+          .side-layout {
+            display: flex;
+            height: 100vh;
+            width: 100%;
           }
 
-          .main-body {
-            flex: 1;
+          .original-text-column {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid rgba(148, 163, 184, 0.3);
+            display: flex;
+            flex-direction: column;
+          }
+
+          .summary-column {
+            width: 50%;
             padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 16px;
-            max-width: calc(100vw - 360px);
           }
 
           .main-body.input-stage {
             align-items: center;
             justify-content: center;
+            width: 100%;
+            height: 100vh;
+            display: flex;
           }
 
           .content-box {
@@ -544,19 +533,13 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           }
 
           .original-text-box {
-            height: 35%;
-            min-height: 600px;
-          }
-
-          .content-row {
-            display: flex;
-            gap: 20px;
-            height: 32.5%;
-            min-height: 500px;
-          }
-
-          .content-row .content-box {
             flex: 1;
+            min-height: 0;
+          }
+
+          .summary-section {
+            flex: 1;
+            min-height: 200px;
           }
 
           .box-header {
@@ -704,215 +687,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             color: #c4b5fd;
           }
 
-          .mini-map {
-            margin-bottom: 24px;
-          }
 
-          .mini-map-title {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: #f1f5f9;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-          }
-
-          .mini-map-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
-            border-radius: 12px;
-            border: 2px solid rgba(148, 163, 184, 0.4);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(20px);
-          }
-
-          .mini-map-row {
-            display: flex;
-            gap: 12px;
-          }
-
-          .mini-map-section {
-            flex: 1;
-            height: 64px;
-            border-radius: 8px;
-            border: 2px solid;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: 700;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-          }
-
-          .mini-map-section.original-text {
-            background: linear-gradient(135deg, #475569, #64748b);
-            border-color: #64748b;
-            color: #ffffff;
-          }
-
-          .mini-map-section.f1 {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            border-color: #1d4ed8;
-            color: #ffffff;
-          }
-
-          .mini-map-section.f2 {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            border-color: #7c3aed;
-            color: #ffffff;
-          }
-
-          .mini-map-section.s1 {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            border-color: #16a34a;
-            color: #ffffff;
-          }
-
-          .mini-map-section.s2 {
-            background: linear-gradient(135deg, #a855f7, #9333ea);
-            border-color: #9333ea;
-            color: #ffffff;
-          }
-
-          .mini-map-section:hover {
-            transform: scale(1.05) translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            z-index: 10;
-          }
-
-          .mini-map-section.original-text:hover {
-            border-color: rgba(71, 85, 105, 1);
-            background: linear-gradient(135deg, rgba(71, 85, 105, 0.8), rgba(71, 85, 105, 1));
-          }
-
-          .mini-map-section.f1:hover {
-            border-color: rgba(59, 130, 246, 1);
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.7), rgba(59, 130, 246, 0.9));
-          }
-
-          .mini-map-section.f2:hover {
-            border-color: rgba(139, 92, 246, 1);
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.7), rgba(139, 92, 246, 0.9));
-          }
-
-          .mini-map-section.s1:hover {
-            border-color: rgba(34, 197, 94, 1);
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.7), rgba(34, 197, 94, 0.9));
-          }
-
-          .mini-map-section.s2:hover {
-            border-color: rgba(168, 85, 247, 1);
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.7), rgba(168, 85, 247, 0.9));
-          }
-
-          .mini-map-section.pending {
-            opacity: 0.5;
-            filter: grayscale(50%);
-          }
-
-          .mini-map-section.loading {
-            position: relative;
-            animation: pulse 1.5s ease-in-out infinite;
-          }
-
-          .mini-map-section.loading::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 1.2s infinite;
-          }
-
-          .mini-map-section.completed {
-            position: relative;
-          }
-
-          .mini-map-section.completed::before {
-            content: '✓';
-            position: absolute;
-            top: 2px;
-            right: 3px;
-            font-size: 8px;
-            color: #ffffff;
-            background: rgba(16, 185, 129, 0.8);
-            border-radius: 50%;
-            width: 12px;
-            height: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-          }
-
-          /* Fragment-specific completion indicators */
-          .mini-map-section.f1.completed::after,
-          .mini-map-section.f2.completed::after {
-            content: attr(data-verified-count);
-            position: absolute;
-            bottom: 2px;
-            right: 3px;
-            font-size: 7px;
-            color: #ffffff;
-            background: rgba(16, 185, 129, 0.8);
-            border-radius: 8px;
-            padding: 1px 3px;
-            line-height: 1;
-            font-weight: bold;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-          }
-
-          .mini-map-verification {
-            margin-top: 12px;
-            padding: 8px;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 6px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-          }
-
-          .mini-map-verification-title {
-            font-size: 12px;
-            font-weight: 500;
-            color: #94a3b8;
-            margin-bottom: 4px;
-          }
-
-          .mini-map-verification-stats {
-            display: flex;
-            gap: 8px;
-            font-size: 10px;
-          }
-
-          .mini-map-verification-stat {
-            flex: 1;
-            text-align: center;
-            padding: 4px;
-            background: rgba(30, 41, 59, 0.4);
-            border-radius: 4px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-          }
-
-          .mini-map-verification-stat.f1 {
-            border-color: rgba(59, 130, 246, 0.3);
-            color: #93c5fd;
-          }
-
-          .mini-map-verification-stat.f2 {
-            border-color: rgba(139, 92, 246, 0.3);
-            color: #c4b5fd;
-          }
 
           @keyframes shimmer {
             0% { left: -100%; }
@@ -1015,87 +790,27 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
       </style>
 
       {currentStage === 'input' ? (
-        <>
-          {/* Left Sidebar - Mini Map Preview */}
-          <div className="sidebar">
-            <div className="mini-map">
-              <h3 className="mini-map-title">🗺️ Layout Preview</h3>
-              
-              <div className="mini-map-grid">
-                {/* Original Text Row */}
-                <div className="mini-map-row">
-                  <div className="mini-map-section original-text pending">
-                    ORIGINAL TEXT
-                  </div>
-                </div>
-                
-                {/* Fragments Row */}
-                <div className="mini-map-row">
-                  <div className="mini-map-section f1 pending">
-                    F1 FRAGMENTS
-                  </div>
-                  <div className="mini-map-section f2 pending">
-                    F2 FRAGMENTS
-                  </div>
-                </div>
-                
-                {/* Summaries Row */}
-                <div className="mini-map-row">
-                  <div className="mini-map-section s2 pending">
-                    S2 SUMMARY
-                  </div>
-                  <div className="mini-map-section s1 pending">
-                    S1 SUMMARY
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '8px', fontSize: '12px', color: '#94a3b8', textAlign: 'center' }}>
-                Click sections to navigate after processing starts
-              </div>
+        <div className="main-body input-stage">
+          <div className="input-container">
+            <div className="input-header">
+              <h1 className="input-title">SMR.io Enhanced Processor</h1>
+              <p className="input-subtitle">Advanced text analysis with interactive visualization</p>
             </div>
-          </div>
-
-          <div className="main-body input-stage">
-            <div className="input-container">
-              <div className="input-header">
-                <h1 className="input-title">SMR.io Enhanced Processor</h1>
-                <p className="input-subtitle">Advanced text analysis with interactive visualization</p>
+            {error && (
+              <div className="error-banner">
+                <strong>Error:</strong> {error}
               </div>
-              {error && (
-                <div className="error-banner">
-                  <strong>Error:</strong> {error}
-                </div>
-              )}
-              <TextInput
-                onSubmit={handleStartProcessing}
-                disabled={false}
-              />
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Left Sidebar - Mini Map */}
-          <div className="sidebar">
-            <VisualMiniMap
-              currentStage={currentStage}
-              loadingStages={loadingStages}
-              f1Fragments={f1Fragments}
-              f2Fragments={f2Fragments}
-              verificationSummary={verificationSummary}
-              onSectionClick={scrollToSection}
-              originalTextRef={originalTextRef}
-              f1ContainerRef={f1ContainerRef}
-              f2ContainerRef={f2ContainerRef}
-              s1ContainerRef={s1ContainerRef}
-              s2ContainerRef={s2ContainerRef}
+            )}
+            <TextInput
+              onSubmit={handleStartProcessing}
+              disabled={false}
             />
           </div>
-
-          {/* Right Main Body */}
-          <div className="main-body" ref={mainBodyRef}>
-            {/* Original Text Box */}
+        </div>
+      ) : (
+        <div className="side-layout">
+          {/* Left Column - Original Text */}
+          <div className="original-text-column">
             <div className="content-box original-text-box">
               <div className="box-header">
                 <h2 className="box-title">📄 Original Text</h2>
@@ -1106,104 +821,101 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Fragments Row */}
-            <div className="content-row">
-              {/* F1 Fragments */}
-              <div className="content-box">
-                <div className="box-header">
-                  <h2 className="box-title">🔍 F1 Fragments</h2>
-                  {loadingStages.has('f1') && <div className="loading-indicator" />}
-                  {!loadingStages.has('f1') && f1Fragments.length > 0 && (
-                    <div className="verification-badge">
-                      ✓ {f1Fragments.filter(f => f.verified).length}/{f1Fragments.length} verified • 
-                      Avg: {formatSimilarityScore(calculateAverageSimilarity(f1Fragments))}
-                    </div>
-                  )}
-                </div>
-                <div className="scrollable-content" ref={f1ContainerRef}>
-                  {f1Fragments.map((fragment) => (
-                    <FragmentItem
-                      key={fragment.id}
-                      fragment={fragment}
-                      type="f1"
-                      onHover={handleFragmentHover}
-                    />
-                  ))}
-                  {f1Fragments.length === 0 && !loadingStages.has('f1') && (
-                    <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>No fragments extracted yet</p>
-                  )}
-                </div>
+          {/* Right Column - Summary Sections (F1, S2, S1, F2) */}
+          <div className="summary-column">
+            {/* F1 Fragments */}
+            <div className="content-box summary-section">
+              <div className="box-header">
+                <h2 className="box-title">🔍 F1 Fragments</h2>
+                {loadingStages.has('f1') && <div className="loading-indicator" />}
+                {!loadingStages.has('f1') && f1Fragments.length > 0 && (
+                  <div className="verification-badge">
+                    ✓ {f1Fragments.filter(f => f.verified).length}/{f1Fragments.length} verified • 
+                    Avg: {formatSimilarityScore(calculateAverageSimilarity(f1Fragments))}
+                  </div>
+                )}
               </div>
-
-              {/* F2 Fragments */}
-              <div className="content-box">
-                <div className="box-header">
-                  <h2 className="box-title">⚖️ F2 Justification Fragments</h2>
-                  {loadingStages.has('f2') && <div className="loading-indicator" />}
-                  {!loadingStages.has('f2') && f2Fragments.length > 0 && (
-                    <div className="verification-badge">
-                      ✓ {f2Fragments.filter(f => f.verified).length}/{f2Fragments.length} verified • 
-                      Avg: {formatSimilarityScore(calculateAverageSimilarity(f2Fragments))}
-                    </div>
-                  )}
-                </div>
-                <div className="scrollable-content" ref={f2ContainerRef}>
-                  {f2Fragments.map((fragment) => (
-                    <FragmentItem
-                      key={fragment.id}
-                      fragment={fragment}
-                      type="f2"
-                      onHover={handleFragmentHover}
-                    />
-                  ))}
-                  {f2Fragments.length === 0 && !loadingStages.has('f2') && (
-                    <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>No justification fragments yet</p>
-                  )}
-                </div>
+              <div className="scrollable-content" ref={f1ContainerRef}>
+                {f1Fragments.map((fragment) => (
+                  <FragmentItem
+                    key={fragment.id}
+                    fragment={fragment}
+                    type="f1"
+                    onHover={handleFragmentHover}
+                  />
+                ))}
+                {f1Fragments.length === 0 && !loadingStages.has('f1') && (
+                  <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>No fragments extracted yet</p>
+                )}
               </div>
             </div>
 
-            {/* Summaries Row */}
-            <div className="content-row">
-              {/* S2 Summary */}
-              <div className="content-box">
-                <div className="box-header">
-                  <h2 className="box-title">📋 S2 Secondary Summary</h2>
-                  {loadingStages.has('s2') && <div className="loading-indicator" />}
-                  {!loadingStages.has('s2') && s2Summary && <div className="success-indicator">✓</div>}
-                </div>
-                <div className="scrollable-content" ref={s2ContainerRef}>
-                  {s2Summary ? (
-                    <div style={{ lineHeight: '1.6', fontSize: '14px' }}>
-                      {s2Summary}
-                    </div>
-                  ) : (
-                    <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>
-                      Secondary summary will be generated from F1 fragments
-                    </p>
-                  )}
-                </div>
+            {/* S2 Secondary Summary */}
+            <div className="content-box summary-section">
+              <div className="box-header">
+                <h2 className="box-title">📋 S2 Secondary Summary</h2>
+                {loadingStages.has('s2') && <div className="loading-indicator" />}
+                {!loadingStages.has('s2') && s2Summary && <div className="success-indicator">✓</div>}
               </div>
+              <div className="scrollable-content" ref={s2ContainerRef}>
+                {s2Summary ? (
+                  <div style={{ lineHeight: '1.6', fontSize: '14px' }}>
+                    {s2Summary}
+                  </div>
+                ) : (
+                  <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                    Secondary summary will be generated from F1 fragments
+                  </p>
+                )}
+              </div>
+            </div>
 
-              {/* S1 Summary */}
-              <div className="content-box">
-                <div className="box-header">
-                  <h2 className="box-title">📝 S1 Primary Summary</h2>
-                  {loadingStages.has('s1') && <div className="loading-indicator" />}
-                  {!loadingStages.has('s1') && s1Summary && <div className="success-indicator">✓</div>}
-                </div>
-                <div className="scrollable-content" ref={s1ContainerRef}>
-                  {s1Summary ? (
-                    <div style={{ lineHeight: '1.6', fontSize: '14px' }}>
-                      {renderHighlightedText(s1Summary, s1SummaryHighlights)}
-                    </div>
-                  ) : (
-                    <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>
-                      Primary summary will be generated from original text
-                    </p>
-                  )}
-                </div>
+            {/* S1 Primary Summary */}
+            <div className="content-box summary-section">
+              <div className="box-header">
+                <h2 className="box-title">📝 S1 Primary Summary</h2>
+                {loadingStages.has('s1') && <div className="loading-indicator" />}
+                {!loadingStages.has('s1') && s1Summary && <div className="success-indicator">✓</div>}
+              </div>
+              <div className="scrollable-content" ref={s1ContainerRef}>
+                {s1Summary ? (
+                  <div style={{ lineHeight: '1.6', fontSize: '14px' }}>
+                    {renderHighlightedText(s1Summary, s1SummaryHighlights)}
+                  </div>
+                ) : (
+                  <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                    Primary summary will be generated from original text
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* F2 Justification Fragments */}
+            <div className="content-box summary-section">
+              <div className="box-header">
+                <h2 className="box-title">⚖️ F2 Justification Fragments</h2>
+                {loadingStages.has('f2') && <div className="loading-indicator" />}
+                {!loadingStages.has('f2') && f2Fragments.length > 0 && (
+                  <div className="verification-badge">
+                    ✓ {f2Fragments.filter(f => f.verified).length}/{f2Fragments.length} verified • 
+                    Avg: {formatSimilarityScore(calculateAverageSimilarity(f2Fragments))}
+                  </div>
+                )}
+              </div>
+              <div className="scrollable-content" ref={f2ContainerRef}>
+                {f2Fragments.map((fragment) => (
+                  <FragmentItem
+                    key={fragment.id}
+                    fragment={fragment}
+                    type="f2"
+                    onHover={handleFragmentHover}
+                  />
+                ))}
+                {f2Fragments.length === 0 && !loadingStages.has('f2') && (
+                  <p style={{ color: '#94a3b8', fontStyle: 'italic' }}>No justification fragments yet</p>
+                )}
               </div>
             </div>
           </div>
@@ -1214,168 +926,13 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               ↻
             </button>
           )}
-        </>
-      )}
-    </div>
-  );
-}
-
-/**
- * Visual mini-map sidebar component showing layout structure
- */
-interface VisualMiniMapProps {
-  currentStage: ProgressiveStage;
-  loadingStages: Set<ProgressiveStage>;
-  f1Fragments: Fragment[];
-  f2Fragments: Fragment[];
-  verificationSummary: VerificationSummary | null;
-  onSectionClick: (sectionRef: React.RefObject<HTMLDivElement>) => void;
-  originalTextRef: React.RefObject<HTMLDivElement>;
-  f1ContainerRef: React.RefObject<HTMLDivElement>;
-  f2ContainerRef: React.RefObject<HTMLDivElement>;
-  s1ContainerRef: React.RefObject<HTMLDivElement>;
-  s2ContainerRef: React.RefObject<HTMLDivElement>;
-}
-
-function VisualMiniMap({ 
-  currentStage, 
-  loadingStages, 
-  f1Fragments, 
-  f2Fragments, 
-  verificationSummary,
-  onSectionClick,
-  originalTextRef,
-  f1ContainerRef,
-  f2ContainerRef,
-  s1ContainerRef,
-  s2ContainerRef
-}: VisualMiniMapProps): JSX.Element {
-  const getSectionStatus = (sectionKey: string): 'pending' | 'loading' | 'completed' => {
-    if (loadingStages.has(sectionKey as ProgressiveStage)) {
-      return 'loading';
-    }
-    
-    const stageOrder = ['input', 'f1', 's2', 's1', 'f2', 'verification', 'completed'];
-    const currentIndex = stageOrder.indexOf(currentStage);
-    const sectionIndex = stageOrder.indexOf(sectionKey);
-    
-    return sectionIndex < currentIndex ? 'completed' : 'pending';
-  };
-
-  const sections = [
-    { 
-      key: 'original-text', 
-      label: 'Original Text', 
-      ref: originalTextRef,
-      status: currentStage !== 'input' ? 'completed' : 'pending',
-      className: 'original-text'
-    },
-    { 
-      key: 'f1', 
-      label: 'F1', 
-      ref: f1ContainerRef,
-      status: getSectionStatus('f1'),
-      className: 'f1'
-    },
-    { 
-      key: 'f2', 
-      label: 'F2', 
-      ref: f2ContainerRef,
-      status: getSectionStatus('f2'),
-      className: 'f2'
-    },
-    { 
-      key: 's2', 
-      label: 'S2', 
-      ref: s2ContainerRef,
-      status: getSectionStatus('s2'),
-      className: 's2'
-    },
-    { 
-      key: 's1', 
-      label: 'S1', 
-      ref: s1ContainerRef,
-      status: getSectionStatus('s1'),
-      className: 's1'
-    }
-  ];
-
-  return (
-    <div className="mini-map">
-      <h3 className="mini-map-title">🗺️ Layout Map</h3>
-      
-      <div className="mini-map-grid">
-        {/* Original Text Row */}
-        <div className="mini-map-row">
-          <div
-            className={`mini-map-section original-text ${sections[0]?.status || 'pending'}`}
-            onClick={() => { sections[0] && onSectionClick(sections[0].ref); }}
-            title="Click to scroll to Original Text"
-          >
-            ORIGINAL TEXT
-          </div>
-        </div>
-        
-        {/* Fragments Row */}
-        <div className="mini-map-row">
-          <div
-            className={`mini-map-section f1 ${sections[1]?.status || 'pending'}`}
-            onClick={() => { sections[1] && onSectionClick(sections[1].ref); }}
-            title={`Click to scroll to F1 Fragments${f1Fragments.length > 0 ? ` (${f1Fragments.filter(f => f.verified).length}/${f1Fragments.length} verified)` : ''}`}
-            data-verified-count={f1Fragments.length > 0 ? `${f1Fragments.filter(f => f.verified).length}/${f1Fragments.length}` : ''}
-          >
-            F1 FRAGMENTS
-          </div>
-          <div
-            className={`mini-map-section f2 ${sections[2]?.status || 'pending'}`}
-            onClick={() => { sections[2] && onSectionClick(sections[2].ref); }}
-            title={`Click to scroll to F2 Fragments${f2Fragments.length > 0 ? ` (${f2Fragments.filter(f => f.verified).length}/${f2Fragments.length} verified)` : ''}`}
-            data-verified-count={f2Fragments.length > 0 ? `${f2Fragments.filter(f => f.verified).length}/${f2Fragments.length}` : ''}
-          >
-            F2 FRAGMENTS
-          </div>
-        </div>
-        
-        {/* Summaries Row */}
-        <div className="mini-map-row">
-          <div
-            className={`mini-map-section s2 ${sections[3]?.status || 'pending'}`}
-            onClick={() => { sections[3] && onSectionClick(sections[3].ref); }}
-            title="Click to scroll to S2 Summary"
-          >
-            S2 SUMMARY
-          </div>
-          <div
-            className={`mini-map-section s1 ${sections[4]?.status || 'pending'}`}
-            onClick={() => { sections[4] && onSectionClick(sections[4].ref); }}
-            title="Click to scroll to S1 Summary"
-          >
-            S1 SUMMARY
-          </div>
-        </div>
-      </div>
-
-      {/* Average Similarity Statistics */}
-      {(f1Fragments.length > 0 || f2Fragments.length > 0) && (
-        <div className="mini-map-verification">
-          <div className="mini-map-verification-title">Average Similarity</div>
-          <div className="mini-map-verification-stats">
-            {f1Fragments.length > 0 && (
-              <div className="mini-map-verification-stat f1">
-                F1: {formatSimilarityScore(calculateAverageSimilarity(f1Fragments))}
-              </div>
-            )}
-            {f2Fragments.length > 0 && (
-              <div className="mini-map-verification-stat f2">
-                F2: {formatSimilarityScore(calculateAverageSimilarity(f2Fragments))}
-              </div>
-            )}
-          </div>
         </div>
       )}
     </div>
   );
 }
+
+
 
 /**
  * Fragment item component with hover handling
