@@ -5,6 +5,9 @@
 
 set -e
 
+# Load environment variables
+export $(grep -v '^#' .env | xargs)
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
