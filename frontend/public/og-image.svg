@@ -1,0 +1,35 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e293b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Main title -->
+  <text x="600" y="280" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="bold" text-anchor="middle" fill="url(#textGradient)">SMR.io</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="32" text-anchor="middle" fill="#e2e8f0">AI-Powered Text Analysis &amp; Verification</text>
+  
+  <!-- Description -->
+  <text x="600" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="24" text-anchor="middle" fill="#94a3b8">Advanced text summarization and fragment extraction</text>
+  <text x="600" y="460" font-family="system-ui, -apple-system, sans-serif" font-size="24" text-anchor="middle" fill="#94a3b8">with AI-powered analysis and mechanical verification</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="200" cy="150" r="4" fill="#3b82f6" opacity="0.6"/>
+  <circle cx="1000" cy="480" r="6" fill="#8b5cf6" opacity="0.4"/>
+  <circle cx="150" cy="500" r="3" fill="#10b981" opacity="0.5"/>
+  <circle cx="1050" cy="120" r="5" fill="#f59e0b" opacity="0.3"/>
+  
+  <!-- URL -->
+  <text x="600" y="560" font-family="system-ui, -apple-system, sans-serif" font-size="20" text-anchor="middle" fill="#64748b">www.llmsmr.io</text>
+</svg>
