@@ -43,6 +43,9 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
   const [originalTextHighlights, setOriginalTextHighlights] = useState<Array<{start: number, end: number, type: 'fragment' | 'sentence'}>>([]);
   const [s1SummaryHighlights, setS1SummaryHighlights] = useState<Array<{start: number, end: number, type: 'fragment' | 'sentence'}>>([]);
 
+  // Collapsed sections state
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+
   // Refs for scrolling
   const originalTextRef = useRef<HTMLDivElement>(null);
   const f1ContainerRef = useRef<HTMLDivElement>(null);
@@ -412,6 +415,21 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
 
 
   /**
+   * Toggle collapse state for a section.
+   */
+  const toggleSectionCollapse = (sectionId: string): void => {
+    setCollapsedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionId)) {
+        newSet.delete(sectionId);
+      } else {
+        newSet.add(sectionId);
+      }
+      return newSet;
+    });
+  };
+
+  /**
    * Reset the component to initial state.
    */
   const handleReset = (): void => {
@@ -428,6 +446,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
     setHoveredFragment(null);
     setOriginalTextHighlights([]);
     setS1SummaryHighlights([]);
+    setCollapsedSections(new Set());
   };
 
   /**
@@ -538,8 +557,16 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           }
 
           .summary-section {
-            flex: 1;
+            flex: 0 0 auto;
             min-height: 200px;
+          }
+
+          .summary-section.collapsed {
+            min-height: auto;
+          }
+
+          .summary-section.collapsed .scrollable-content {
+            display: none;
           }
 
           .box-header {
@@ -549,6 +576,24 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             margin-bottom: 16px;
             padding-bottom: 12px;
             border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+          }
+
+          .collapse-button {
+            background: transparent;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 8px;
+            transition: all 0.2s ease;
+            margin-left: auto;
+          }
+
+          .collapse-button:hover {
+            background: rgba(148, 163, 184, 0.1);
+            border-color: rgba(148, 163, 184, 0.5);
+            color: #e2e8f0;
           }
 
           .box-title {
@@ -826,7 +871,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           {/* Right Column - Summary Sections (F1, S2, S1, F2) */}
           <div className="summary-column">
             {/* F1 Fragments */}
-            <div className="content-box summary-section">
+            <div className={`content-box summary-section ${collapsedSections.has('f1') ? 'collapsed' : ''}`}>
               <div className="box-header">
                 <h2 className="box-title">🔍 F1 Fragments</h2>
                 {loadingStages.has('f1') && <div className="loading-indicator" />}
@@ -836,6 +881,13 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                     Avg: {formatSimilarityScore(calculateAverageSimilarity(f1Fragments))}
                   </div>
                 )}
+                <button 
+                  className="collapse-button"
+                  onClick={() => toggleSectionCollapse('f1')}
+                  title={collapsedSections.has('f1') ? 'Expand section' : 'Collapse section'}
+                >
+                  {collapsedSections.has('f1') ? '▼' : '▲'}
+                </button>
               </div>
               <div className="scrollable-content" ref={f1ContainerRef}>
                 {f1Fragments.map((fragment) => (
@@ -853,11 +905,18 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             </div>
 
             {/* S2 Secondary Summary */}
-            <div className="content-box summary-section">
+            <div className={`content-box summary-section ${collapsedSections.has('s2') ? 'collapsed' : ''}`}>
               <div className="box-header">
                 <h2 className="box-title">📋 S2 Secondary Summary</h2>
                 {loadingStages.has('s2') && <div className="loading-indicator" />}
                 {!loadingStages.has('s2') && s2Summary && <div className="success-indicator">✓</div>}
+                <button 
+                  className="collapse-button"
+                  onClick={() => toggleSectionCollapse('s2')}
+                  title={collapsedSections.has('s2') ? 'Expand section' : 'Collapse section'}
+                >
+                  {collapsedSections.has('s2') ? '▼' : '▲'}
+                </button>
               </div>
               <div className="scrollable-content" ref={s2ContainerRef}>
                 {s2Summary ? (
@@ -873,11 +932,18 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             </div>
 
             {/* S1 Primary Summary */}
-            <div className="content-box summary-section">
+            <div className={`content-box summary-section ${collapsedSections.has('s1') ? 'collapsed' : ''}`}>
               <div className="box-header">
                 <h2 className="box-title">📝 S1 Primary Summary</h2>
                 {loadingStages.has('s1') && <div className="loading-indicator" />}
                 {!loadingStages.has('s1') && s1Summary && <div className="success-indicator">✓</div>}
+                <button 
+                  className="collapse-button"
+                  onClick={() => toggleSectionCollapse('s1')}
+                  title={collapsedSections.has('s1') ? 'Expand section' : 'Collapse section'}
+                >
+                  {collapsedSections.has('s1') ? '▼' : '▲'}
+                </button>
               </div>
               <div className="scrollable-content" ref={s1ContainerRef}>
                 {s1Summary ? (
@@ -893,7 +959,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             </div>
 
             {/* F2 Justification Fragments */}
-            <div className="content-box summary-section">
+            <div className={`content-box summary-section ${collapsedSections.has('f2') ? 'collapsed' : ''}`}>
               <div className="box-header">
                 <h2 className="box-title">⚖️ F2 Justification Fragments</h2>
                 {loadingStages.has('f2') && <div className="loading-indicator" />}
@@ -903,6 +969,13 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                     Avg: {formatSimilarityScore(calculateAverageSimilarity(f2Fragments))}
                   </div>
                 )}
+                <button 
+                  className="collapse-button"
+                  onClick={() => toggleSectionCollapse('f2')}
+                  title={collapsedSections.has('f2') ? 'Expand section' : 'Collapse section'}
+                >
+                  {collapsedSections.has('f2') ? '▼' : '▲'}
+                </button>
               </div>
               <div className="scrollable-content" ref={f2ContainerRef}>
                 {f2Fragments.map((fragment) => (
