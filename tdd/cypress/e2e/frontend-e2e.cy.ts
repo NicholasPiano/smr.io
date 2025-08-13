@@ -150,7 +150,7 @@ describe('Frontend End-to-End Tests', () => {
     });
   });
 
-  describe('Results Display and Tab Navigation', () => {
+  describe('Results Display and Similarity Scores', () => {
     beforeEach(() => {
       // Process text before each test in this section
       cy.get('[data-testid="text-input"]')
@@ -189,6 +189,62 @@ describe('Frontend End-to-End Tests', () => {
       // Go back to overview
       cy.get('[data-testid="tab-overview"]').click();
       cy.get('[data-testid="tab-overview"]').should('be.visible');
+    });
+
+    it('should display similarity scores in fragment displays', () => {
+      // Switch to fragments view to see detailed fragment information
+      cy.get('[data-testid="tab-fragments"]').click();
+      
+      // Look for fragments section
+      cy.contains('F1 Fragments').should('be.visible');
+      
+      // Check that similarity scores are displayed
+      cy.get('body').should('contain', '%'); // Similarity scores should show as percentages
+      
+      // Check for similarity score visual indicators (icons)
+      cy.get('body').should(($body) => {
+        const text = $body.text();
+        // Should contain similarity-related content
+        expect(text).to.satisfy((text: string) => 
+          text.includes('🎯') || text.includes('✅') || text.includes('⚠️') || 
+          text.includes('❌') || text.includes('🚫') || text.includes('%')
+        );
+      });
+    });
+
+    it('should show average similarity scores in fragment headers', () => {
+      // Switch to fragments view
+      cy.get('[data-testid="tab-fragments"]').click();
+      
+      // Look for F1 Fragments section with average similarity
+      cy.contains('F1 Fragments').should('be.visible');
+      cy.get('body').should('contain', 'Avg Similarity');
+      
+      // Verify percentage format in averages
+      cy.get('body').should(($body) => {
+        const text = $body.text();
+        // Should contain "Avg Similarity: XX.X%" pattern
+        expect(text).to.match(/Avg Similarity: \d+\.\d+%/);
+      });
+    });
+
+    it('should display color-coded similarity indicators', () => {
+      // Switch to fragments view
+      cy.get('[data-testid="tab-fragments"]').click();
+      
+      // Check that fragment cards exist (they should have color coding)
+      cy.get('.fragment-card, .fragment-item').should('exist').then(($fragments) => {
+        // Each fragment should have visual styling (we can't easily test colors, but we can verify elements exist)
+        expect($fragments.length).to.be.greaterThan(0);
+      });
+      
+      // Verify progress bars exist (indicating similarity visualization)
+      cy.get('body').should(($body) => {
+        const html = $body.html();
+        // Look for div elements that likely represent progress bars based on styling
+        const hasProgressBars = html.includes('background:') && html.includes('width:') && html.includes('%');
+        expect(hasProgressBars, 'Should have progress bar styling for similarity visualization').to.be.true;
+      });
     });
   });
 

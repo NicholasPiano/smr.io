@@ -104,7 +104,10 @@ describe('Backend Integration Tests', () => {
             expect(fragment).to.have.property('sequence_number', index + 1);
             expect(fragment).to.have.property('content');
             expect(fragment).to.have.property('verified');
+            expect(fragment).to.have.property('similarity_score');
             expect(fragment).to.have.property('created_at');
+            expect(fragment.similarity_score).to.be.a('number');
+            expect(fragment.similarity_score).to.be.within(0, 100);
           });
           
           // Verify F2 fragment structure
@@ -113,9 +116,12 @@ describe('Backend Integration Tests', () => {
             expect(fragment).to.have.property('content');
             expect(fragment).to.have.property('related_sentence');
             expect(fragment).to.have.property('verified');
+            expect(fragment).to.have.property('similarity_score');
             expect(fragment).to.have.property('start_position');
             expect(fragment).to.have.property('end_position');
             expect(fragment).to.have.property('created_at');
+            expect(fragment.similarity_score).to.be.a('number');
+            expect(fragment.similarity_score).to.be.within(0, 100);
           });
           
           // Verify verification summary

@@ -22,6 +22,7 @@
         "sequence_number": 1,
         "content": "Climate change represents one of the most pressing challenges of our time",
         "verified": true,
+        "similarity_score": 100.0,
         "start_position": 0,
         "end_position": 70,
         "created_at": "2024-01-01T12:00:10Z"
@@ -31,6 +32,7 @@
         "sequence_number": 2,
         "content": "requiring unprecedented global cooperation and innovative solutions",
         "verified": true,
+        "similarity_score": 100.0,
         "start_position": 72,
         "end_position": 138,
         "created_at": "2024-01-01T12:00:10Z"
@@ -40,6 +42,7 @@
         "sequence_number": 3,
         "content": "human activities, particularly the emission of greenhouse gases from burning fossil fuels",
         "verified": true,
+        "similarity_score": 95.5,
         "start_position": 170,
         "end_position": 258,
         "created_at": "2024-01-01T12:00:10Z"
@@ -49,6 +52,7 @@
         "sequence_number": 4,
         "content": "are the primary driver of rising global temperatures",
         "verified": true,
+        "similarity_score": 88.2,
         "start_position": 260,
         "end_position": 311,
         "created_at": "2024-01-01T12:00:10Z"
@@ -58,6 +62,7 @@
         "sequence_number": 5,
         "content": "The effects are already visible worldwide",
         "verified": true,
+        "similarity_score": 92.8,
         "start_position": 313,
         "end_position": 353,
         "created_at": "2024-01-01T12:00:10Z"
@@ -67,6 +72,7 @@
         "sequence_number": 6,
         "content": "melting ice caps and rising sea levels",
         "verified": true,
+        "similarity_score": 87.4,
         "start_position": 360,
         "end_position": 398,
         "created_at": "2024-01-01T12:00:10Z"
@@ -76,6 +82,7 @@
         "sequence_number": 7,
         "content": "more frequent extreme weather events",
         "verified": true,
+        "similarity_score": 75.6,
         "start_position": 402,
         "end_position": 438,
         "created_at": "2024-01-01T12:00:10Z"
@@ -85,6 +92,7 @@
         "sequence_number": 8,
         "content": "shifts in agricultural patterns",
         "verified": true,
+        "similarity_score": 91.3,
         "start_position": 443,
         "end_position": 474,
         "created_at": "2024-01-01T12:00:10Z"
@@ -94,6 +102,7 @@
         "sequence_number": 9,
         "content": "scientific consensus is clear",
         "verified": true,
+        "similarity_score": 89.7,
         "start_position": 144,
         "end_position": 173,
         "created_at": "2024-01-01T12:00:10Z"
@@ -103,6 +112,7 @@
         "sequence_number": 10,
         "content": "greenhouse gases from burning fossil fuels",
         "verified": true,
+        "similarity_score": 96.1,
         "start_position": 215,
         "end_position": 258,
         "created_at": "2024-01-01T12:00:10Z"
@@ -115,6 +125,7 @@
         "content": "Climate change represents one of the most pressing challenges of our time",
         "related_sentence": "Climate change is a critical global challenge driven by human activities, particularly greenhouse gas emissions from fossil fuels.",
         "verified": true,
+        "similarity_score": 100.0,
         "start_position": 0,
         "end_position": 70,
         "created_at": "2024-01-01T12:00:25Z"
@@ -125,6 +136,7 @@
         "content": "human activities, particularly the emission of greenhouse gases from burning fossil fuels, are the primary driver",
         "related_sentence": "Climate change is a critical global challenge driven by human activities, particularly greenhouse gas emissions from fossil fuels.",
         "verified": true,
+        "similarity_score": 93.8,
         "start_position": 170,
         "end_position": 282,
         "created_at": "2024-01-01T12:00:25Z"
@@ -135,6 +147,7 @@
         "content": "The effects are already visible worldwide, from melting ice caps and rising sea levels",
         "related_sentence": "Rising temperatures are causing visible effects including melting ice caps, rising sea levels, and extreme weather events.",
         "verified": true,
+        "similarity_score": 86.4,
         "start_position": 313,
         "end_position": 398,
         "created_at": "2024-01-01T12:00:25Z"
