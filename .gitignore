@@ -30,6 +30,9 @@ __pycache__/
 .venv/
 venv/
 
+# Database
+db/
+
 # Coverage
 coverage/
 .nyc_output/
