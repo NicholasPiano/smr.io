@@ -173,13 +173,13 @@ While the challenge is enormous, there are reasons for optimism. Technological a
         fontSize: '14px',
         color: '#93c5fd'
       }}>
-        <strong>What happens next:</strong>
+        <strong>How it works:</strong>
         <ol style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
-          <li>AI generates a primary summary (S1)</li>
-          <li>Extracts 10 verbatim fragments (F1[])</li>
-          <li>Creates a secondary summary from fragments (S2)</li>
-          <li>Finds justification fragments for each summary sentence (F2[])</li>
-          <li>Mechanically verifies all fragments against original text</li>
+          <li>Creates an AI-powered summary of your text</li>
+          <li>Finds 10 key quotes from your original text</li>
+          <li>Builds a second summary using only those quotes</li>
+          <li>Shows which parts of your text support each summary point</li>
+          <li>Verifies everything is accurate and traceable</li>
         </ol>
       </div>
     </div>

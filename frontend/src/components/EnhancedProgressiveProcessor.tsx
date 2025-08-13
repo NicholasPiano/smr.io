@@ -985,8 +985,8 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               <div className="logo-header">
                 <img src={logoSvg} alt="SMR.io" className="app-logo" />
               </div>
-              <h1 className="input-title">SMR.io Enhanced Processor</h1>
-              <p className="input-subtitle">Advanced text analysis with interactive visualization</p>
+              <h1 className="input-title">Text Analysis & Verification</h1>
+              <p className="input-subtitle">AI-powered summaries with evidence tracking</p>
             </div>
             {error && (
               <div className="error-banner">
@@ -1011,7 +1011,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           <div className="original-text-column">
             <div className="content-box original-text-box">
               <div className="box-header">
-                <h2 className="box-title">📄 Original Text</h2>
+                <h2 className="box-title">📄 Your Text</h2>
               </div>
               <div className="scrollable-content" ref={originalTextRef}>
                 <div style={{ lineHeight: '1.8', fontSize: '14px', whiteSpace: 'pre-wrap' }}>
@@ -1026,7 +1026,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             {/* F1 Fragments */}
             <div className={`content-box summary-section ${collapsedSections.has('f1') ? 'collapsed' : ''}`}>
               <div className="box-header">
-                <h2 className="box-title">🔍 F1 Fragments</h2>
+                <h2 className="box-title">🔍 Key Quotes</h2>
                 {loadingStages.has('f1') && <div className="loading-indicator" />}
                 {!loadingStages.has('f1') && f1Fragments.length > 0 && (
                   <div className="verification-badge">
@@ -1044,7 +1044,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               </div>
               {!collapsedSections.has('f1') && (
                 <div className="section-explanation">
-                  Key verbatim fragments extracted directly from the original text. These segments represent the most important content identified by AI analysis, with similarity scores showing how closely they match the source material.
+                  Important quotes pulled directly from your text. These are the most significant passages identified by AI, with accuracy scores showing how perfectly they match your original words.
                 </div>
               )}
               <div className="scrollable-content" ref={f1ContainerRef}>
@@ -1065,7 +1065,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             {/* S2 Secondary Summary */}
             <div className={`content-box summary-section ${collapsedSections.has('s2') ? 'collapsed' : ''}`}>
               <div className="box-header">
-                <h2 className="box-title">📋 S2 Secondary Summary</h2>
+                <h2 className="box-title">📋 Quote-Based Summary</h2>
                 {loadingStages.has('s2') && <div className="loading-indicator" />}
                 {!loadingStages.has('s2') && s2Summary && <div className="success-indicator">✓</div>}
                 <button 
@@ -1078,7 +1078,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               </div>
               {!collapsedSections.has('s2') && (
                 <div className="section-explanation">
-                  A refined summary generated from the F1 fragments above. This secondary summary focuses on synthesizing the key extracted segments into a cohesive overview, providing a distilled perspective based on the most important content.
+                  A summary built entirely from the key quotes above. This shows what story emerges when we use only the most important passages from your text, creating a focused overview of the essential content.
                 </div>
               )}
               <div className="scrollable-content" ref={s2ContainerRef}>
@@ -1100,7 +1100,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               className={s1SectionClassName}
             >
               <div className="box-header">
-                <h2 className="box-title">📝 S1 Primary Summary</h2>
+                <h2 className="box-title">📝 AI Summary</h2>
                 {loadingStages.has('s1') && <div className="loading-indicator" />}
                 {!loadingStages.has('s1') && s1Summary && <div className="success-indicator">✓</div>}
                 <button 
@@ -1113,7 +1113,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               </div>
               {!collapsedSections.has('s1') && (
                 <div className="section-explanation">
-                  The initial AI-generated summary of the entire original text. This primary summary serves as the foundation for fragment extraction and provides a comprehensive overview of the main themes and key points from the source material.
+                  AI's first-pass summary of your entire text. This captures the main themes and key points, and serves as the foundation for finding supporting quotes and building the evidence-based summary above.
                 </div>
               )}
               <div className="scrollable-content" ref={s1ContainerRef}>
@@ -1132,7 +1132,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             {/* F2 Justification Fragments */}
             <div className={`content-box summary-section ${collapsedSections.has('f2') ? 'collapsed' : ''}`}>
               <div className="box-header">
-                <h2 className="box-title">⚖️ F2 Justification Fragments</h2>
+                <h2 className="box-title">⚖️ Supporting Evidence</h2>
                 {loadingStages.has('f2') && <div className="loading-indicator" />}
                 {!loadingStages.has('f2') && f2Fragments.length > 0 && (
                   <div className="verification-badge">
@@ -1150,7 +1150,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               </div>
               {!collapsedSections.has('f2') && (
                 <div className="section-explanation">
-                  Supporting fragments from the original text that justify and validate claims made in the primary summary. Each fragment shows which specific sentence from S1 it supports, helping to verify the accuracy of the summarization process.
+                  Specific quotes from your text that back up each point in the AI summary. Each quote shows exactly which summary statement it supports, helping you verify that the AI's conclusions are grounded in your actual content.
                 </div>
               )}
               <div className="scrollable-content" ref={f2ContainerRef}>
@@ -1206,7 +1206,7 @@ function FragmentItem({ fragment, type, onHover }: FragmentItemProps): JSX.Eleme
     >
       <div className="fragment-header">
         <span className="fragment-number">
-          {type.toUpperCase()}-{fragment.sequence_number}
+          {type === 'f1' ? 'Quote' : 'Evidence'} #{fragment.sequence_number}
         </span>
         <div style={{
           display: 'flex',
