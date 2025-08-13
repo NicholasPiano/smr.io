@@ -693,6 +693,17 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             color: #e2e8f0;
           }
 
+          .section-explanation {
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 6px;
+            border-left: 3px solid rgba(148, 163, 184, 0.3);
+          }
+
           .box-title {
             font-size: 18px;
             font-weight: 600;
@@ -986,6 +997,11 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                   {collapsedSections.has('f1') ? '▼' : '▲'}
                 </button>
               </div>
+              {!collapsedSections.has('f1') && (
+                <div className="section-explanation">
+                  Key verbatim fragments extracted directly from the original text. These segments represent the most important content identified by AI analysis, with similarity scores showing how closely they match the source material.
+                </div>
+              )}
               <div className="scrollable-content" ref={f1ContainerRef}>
                 {f1Fragments.map((fragment) => (
                   <FragmentItem
@@ -1015,6 +1031,11 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                   {collapsedSections.has('s2') ? '▼' : '▲'}
                 </button>
               </div>
+              {!collapsedSections.has('s2') && (
+                <div className="section-explanation">
+                  A refined summary generated from the F1 fragments above. This secondary summary focuses on synthesizing the key extracted segments into a cohesive overview, providing a distilled perspective based on the most important content.
+                </div>
+              )}
               <div className="scrollable-content" ref={s2ContainerRef}>
                 {s2Summary ? (
                   <div style={{ lineHeight: '1.6', fontSize: '14px' }}>
@@ -1045,6 +1066,11 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                   {collapsedSections.has('s1') ? '▼' : '▲'}
                 </button>
               </div>
+              {!collapsedSections.has('s1') && (
+                <div className="section-explanation">
+                  The initial AI-generated summary of the entire original text. This primary summary serves as the foundation for fragment extraction and provides a comprehensive overview of the main themes and key points from the source material.
+                </div>
+              )}
               <div className="scrollable-content" ref={s1ContainerRef}>
                 {s1Summary ? (
                   <div style={{ lineHeight: '1.6', fontSize: '14px' }}>
@@ -1077,6 +1103,11 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                   {collapsedSections.has('f2') ? '▼' : '▲'}
                 </button>
               </div>
+              {!collapsedSections.has('f2') && (
+                <div className="section-explanation">
+                  Supporting fragments from the original text that justify and validate claims made in the primary summary. Each fragment shows which specific sentence from S1 it supports, helping to verify the accuracy of the summarization process.
+                </div>
+              )}
               <div className="scrollable-content" ref={f2ContainerRef}>
                 {f2Fragments.map((fragment) => (
                   <FragmentItem
