@@ -1,42 +1,52 @@
 <svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background circle/container -->
-  <rect x="8" y="8" width="44" height="44" rx="12" fill="#2563eb" opacity="0.1" stroke="#2563eb" stroke-width="1"/>
+  <defs>
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
   
-  <!-- Icon representing text fragments -->
-  <g transform="translate(16, 16)">
-    <!-- Main document/text representation -->
-    <rect x="2" y="2" width="20" height="26" rx="2" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+  <!-- Background container -->
+  <rect x="6" y="6" width="48" height="48" rx="12" fill="rgba(37, 99, 235, 0.08)" stroke="url(#primaryGradient)" stroke-width="1"/>
+  
+  <!-- Main icon -->
+  <g transform="translate(14, 14)">
+    <!-- Document -->
+    <rect x="0" y="0" width="18" height="24" rx="2" fill="none" stroke="url(#primaryGradient)" stroke-width="1.5"/>
     
     <!-- Text lines -->
-    <line x1="5" y1="6" x2="16" y2="6" stroke="#2563eb" stroke-width="1" opacity="0.7"/>
-    <line x1="5" y1="9" x2="19" y2="9" stroke="#2563eb" stroke-width="1" opacity="0.7"/>
-    <line x1="5" y1="12" x2="14" y2="12" stroke="#2563eb" stroke-width="1" opacity="0.7"/>
+    <line x1="3" y1="4" x2="12" y2="4" stroke="#2563eb" stroke-width="1" opacity="0.6"/>
+    <line x1="3" y1="7" x2="15" y2="7" stroke="#2563eb" stroke-width="1" opacity="0.6"/>
+    <line x1="3" y1="10" x2="10" y2="10" stroke="#2563eb" stroke-width="1" opacity="0.6"/>
+    <line x1="3" y1="13" x2="13" y2="13" stroke="#2563eb" stroke-width="1" opacity="0.4"/>
+    <line x1="3" y1="16" x2="8" y2="16" stroke="#2563eb" stroke-width="1" opacity="0.4"/>
     
-    <!-- Fragment extraction arrows -->
-    <path d="M22 8 L26 10 L22 12 Z" fill="#2563eb" opacity="0.8"/>
-    <path d="M22 18 L26 20 L22 22 Z" fill="#2563eb" opacity="0.8"/>
+    <!-- Extraction arrows -->
+    <path d="M20 6 L24 8 L20 10 Z" fill="url(#primaryGradient)"/>
+    <path d="M20 14 L24 16 L20 18 Z" fill="url(#primaryGradient)"/>
     
-    <!-- Extracted fragments -->
-    <rect x="27" y="7" width="6" height="6" rx="1" fill="#2563eb" opacity="0.3"/>
-    <rect x="27" y="17" width="6" height="6" rx="1" fill="#2563eb" opacity="0.3"/>
+    <!-- Fragment boxes -->
+    <rect x="26" y="5" width="6" height="6" rx="1" fill="#2563eb" opacity="0.2" stroke="#2563eb" stroke-width="0.5"/>
+    <rect x="26" y="13" width="6" height="6" rx="1" fill="#2563eb" opacity="0.2" stroke="#2563eb" stroke-width="0.5"/>
   </g>
   
-  <!-- SMR.IO text -->
-  <g font-family="system-ui, -apple-system, sans-serif" font-weight="600">
+  <!-- Text content -->
+  <g>
     <!-- SMR -->
-    <text x="65" y="25" font-size="24" fill="#1f2937" letter-spacing="-0.5px">SMR</text>
+    <text x="62" y="28" font-family="ui-sans-serif, system-ui, sans-serif" font-size="22" font-weight="700" fill="#1f2937" letter-spacing="-0.02em">SMR</text>
+    
     <!-- .io -->
-    <text x="128" y="25" font-size="18" fill="#6b7280" font-weight="400">.io</text>
-  </g>
-  
-  <!-- Tagline -->
-  <text x="65" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#9ca3af" font-weight="400" letter-spacing="0.5px">TEXT PROCESSING & ANALYSIS</text>
-  
-  <!-- Verification dots/indicators -->
-  <g transform="translate(65, 48)">
-    <circle cx="0" cy="0" r="2" fill="#10b981"/>
-    <circle cx="8" cy="0" r="2" fill="#10b981"/>
-    <circle cx="16" cy="0" r="2" fill="#10b981"/>
-    <text x="24" y="3" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#6b7280">VERIFIED</text>
+    <text x="118" y="28" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16" font-weight="400" fill="#6b7280">.io</text>
+    
+    <!-- Tagline -->
+    <text x="62" y="42" font-family="ui-sans-serif, system-ui, sans-serif" font-size="9" font-weight="500" fill="#9ca3af" letter-spacing="0.05em">TEXT PROCESSING</text>
+    
+    <!-- Status indicators -->
+    <g transform="translate(62, 50)">
+      <circle cx="0" cy="0" r="1.5" fill="#10b981"/>
+      <circle cx="6" cy="0" r="1.5" fill="#10b981"/>
+      <circle cx="12" cy="0" r="1.5" fill="#10b981"/>
+      <text x="18" y="2" font-family="ui-sans-serif, system-ui, sans-serif" font-size="7" font-weight="500" fill="#6b7280">VERIFIED</text>
+    </g>
   </g>
 </svg>
