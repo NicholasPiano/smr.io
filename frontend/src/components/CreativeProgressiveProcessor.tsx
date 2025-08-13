@@ -8,6 +8,13 @@ import {
   completeVerification 
 } from '../services/api';
 import type { ProgressiveStage, Fragment, VerificationSummary } from '../types/api';
+import { 
+  formatSimilarityScore, 
+  getSimilarityColor, 
+  getSimilarityLabel, 
+  getSimilarityIcon,
+  calculateAverageSimilarity 
+} from '../utils/similarity';
 
 /**
  * Enhanced progressive text processor with creative UI visualizations.
@@ -1105,6 +1112,16 @@ function FragmentsView({ f1Fragments, f2Fragments, originalText }: FragmentsView
           </div>
           <h3 style={{ margin: 0 }}>
             F1 Fragments ({f1Fragments.length}) - {Math.round((f1Fragments.filter(f => f.verified).length / Math.max(f1Fragments.length, 1)) * 100)}% Verified
+            {f1Fragments.length > 0 && (
+              <span style={{ 
+                fontSize: '12px', 
+                fontWeight: '400', 
+                color: '#94a3b8',
+                marginLeft: '8px'
+              }}>
+                • Avg Similarity: {formatSimilarityScore(calculateAverageSimilarity(f1Fragments))}
+              </span>
+            )}
           </h3>
         </div>
         
@@ -1129,6 +1146,16 @@ function FragmentsView({ f1Fragments, f2Fragments, originalText }: FragmentsView
           </div>
           <h3 style={{ margin: 0 }}>
             F2 Justification Fragments ({f2Fragments.length}) - {Math.round((f2Fragments.filter(f => f.verified).length / Math.max(f2Fragments.length, 1)) * 100)}% Verified
+            {f2Fragments.length > 0 && (
+              <span style={{ 
+                fontSize: '12px', 
+                fontWeight: '400', 
+                color: '#94a3b8',
+                marginLeft: '8px'
+              }}>
+                • Avg Similarity: {formatSimilarityScore(calculateAverageSimilarity(f2Fragments))}
+              </span>
+            )}
           </h3>
         </div>
         
@@ -1158,6 +1185,10 @@ interface FragmentCardProps {
 }
 
 function FragmentCard({ fragment, index, type }: FragmentCardProps): JSX.Element {
+  // Provide default similarity score if missing
+  const similarityScore = fragment.similarity_score ?? 0;
+  const similarityColors = getSimilarityColor(similarityScore);
+  
   return (
     <div className={`fragment-card ${fragment.verified ? 'verified' : 'unverified'}`}>
       <div style={{
@@ -1195,14 +1226,74 @@ function FragmentCard({ fragment, index, type }: FragmentCardProps): JSX.Element
           </div>
         </div>
         
-        <span style={{
-          fontSize: '10px',
-          color: fragment.verified ? '#10b981' : '#ef4444',
-          fontWeight: '500',
-          textTransform: 'uppercase'
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
         }}>
-          {fragment.verified ? 'Verified' : 'Unverified'}
-        </span>
+          <span style={{
+            fontSize: '10px',
+            color: fragment.verified ? '#10b981' : '#ef4444',
+            fontWeight: '500',
+            textTransform: 'uppercase'
+          }}>
+            {fragment.verified ? 'Verified' : 'Unverified'}
+          </span>
+        </div>
+      </div>
+
+      {/* Similarity Score Display */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '12px',
+        padding: '8px 10px',
+        background: `${similarityColors.text}15`,
+        borderRadius: '6px',
+        border: `1px solid ${similarityColors.border}30`
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span style={{ fontSize: '14px' }}>
+            {getSimilarityIcon(similarityScore)}
+          </span>
+          <div>
+            <div style={{
+              fontSize: '14px',
+              fontWeight: '700',
+              color: similarityColors.text
+            }}>
+              {formatSimilarityScore(similarityScore)}
+            </div>
+            <div style={{
+              fontSize: '10px',
+              color: similarityColors.text,
+              opacity: 0.8,
+              fontWeight: '500'
+            }}>
+              {getSimilarityLabel(similarityScore)} Match
+            </div>
+          </div>
+        </div>
+        <div style={{
+          width: '32px',
+          height: '6px',
+          borderRadius: '3px',
+          background: 'rgba(255, 255, 255, 0.1)',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            width: `${similarityScore}%`,
+            height: '100%',
+            background: similarityColors.background,
+            borderRadius: '3px',
+            transition: 'width 0.3s ease'
+          }} />
+        </div>
       </div>
 
       {type === 'f2' && fragment.related_sentence && (

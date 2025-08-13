@@ -305,12 +305,19 @@ def complete_verification(request, submission_id):
         processor = TextProcessor()
         verification_summary = processor.complete_verification(str(submission.id))
 
+        # Refresh submission from database to get updated processing_completed_at
+        submission.refresh_from_db()
+
         return Response(
             {
                 "submission_id": str(submission.id),
                 "status": "completed",
                 "verification_summary": verification_summary,
-                "processing_completed_at": submission.processing_completed_at.isoformat(),
+                "processing_completed_at": (
+                    submission.processing_completed_at.isoformat()
+                    if submission.processing_completed_at
+                    else None
+                ),
             },
             status=status.HTTP_200_OK,
         )

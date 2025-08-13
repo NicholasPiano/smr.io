@@ -11,6 +11,7 @@ export interface Fragment {
   sequence_number: number;
   content: string;
   verified: boolean;
+  similarity_score: number;
   start_position: number | null;
   end_position: number | null;
   created_at: string;

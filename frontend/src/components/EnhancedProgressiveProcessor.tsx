@@ -8,6 +8,13 @@ import {
   completeVerification 
 } from '../services/api';
 import type { ProgressiveStage, Fragment, VerificationSummary } from '../types/api';
+import { 
+  formatSimilarityScore, 
+  getSimilarityColor, 
+  getSimilarityLabel, 
+  getSimilarityIcon,
+  calculateAverageSimilarity 
+} from '../utils/similarity';
 
 /**
  * Enhanced progressive text processor with two-column layout:
@@ -978,7 +985,8 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                   {loadingStages.has('f1') && <div className="loading-indicator" />}
                   {!loadingStages.has('f1') && f1Fragments.length > 0 && (
                     <div className="verification-badge">
-                      ✓ {f1Fragments.filter(f => f.verified).length}/{f1Fragments.length} verified
+                      ✓ {f1Fragments.filter(f => f.verified).length}/{f1Fragments.length} verified • 
+                      Avg: {formatSimilarityScore(calculateAverageSimilarity(f1Fragments))}
                     </div>
                   )}
                 </div>
@@ -1004,7 +1012,8 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
                   {loadingStages.has('f2') && <div className="loading-indicator" />}
                   {!loadingStages.has('f2') && f2Fragments.length > 0 && (
                     <div className="verification-badge">
-                      ✓ {f2Fragments.filter(f => f.verified).length}/{f2Fragments.length} verified
+                      ✓ {f2Fragments.filter(f => f.verified).length}/{f2Fragments.length} verified • 
+                      Avg: {formatSimilarityScore(calculateAverageSimilarity(f2Fragments))}
                     </div>
                   )}
                 </div>
@@ -1243,6 +1252,10 @@ interface FragmentItemProps {
 }
 
 function FragmentItem({ fragment, type, onHover }: FragmentItemProps): JSX.Element {
+  // Provide default similarity score if missing
+  const similarityScore = fragment.similarity_score ?? 0;
+  const similarityColors = getSimilarityColor(similarityScore);
+  
   return (
     <div
       className={`fragment-item ${type}`}
@@ -1253,8 +1266,27 @@ function FragmentItem({ fragment, type, onHover }: FragmentItemProps): JSX.Eleme
         <span className="fragment-number">
           {type.toUpperCase()}-{fragment.sequence_number}
         </span>
-        <div className={`fragment-status ${fragment.verified ? 'verified' : 'unverified'}`}>
-          {fragment.verified ? '✓' : '✕'}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px'
+        }}>
+          <div style={{
+            fontSize: '11px',
+            fontWeight: '600',
+            color: similarityColors.text,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '3px'
+          }}>
+            <span style={{ fontSize: '10px' }}>
+              {getSimilarityIcon(similarityScore)}
+            </span>
+            {formatSimilarityScore(similarityScore)}
+          </div>
+          <div className={`fragment-status ${fragment.verified ? 'verified' : 'unverified'}`}>
+            {fragment.verified ? '✓' : '✕'}
+          </div>
         </div>
       </div>
       
@@ -1266,6 +1298,24 @@ function FragmentItem({ fragment, type, onHover }: FragmentItemProps): JSX.Eleme
       
       <div className="fragment-content">
         {fragment.content}
+      </div>
+      
+      {/* Similarity Progress Bar */}
+      <div style={{
+        marginTop: '8px',
+        width: '100%',
+        height: '3px',
+        background: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: '2px',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          width: `${similarityScore}%`,
+          height: '100%',
+          background: similarityColors.background,
+          borderRadius: '2px',
+          transition: 'width 0.3s ease'
+        }} />
       </div>
     </div>
   );

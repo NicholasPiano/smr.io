@@ -8,6 +8,10 @@ summaries, and extracted fragments with their verification status.
 from django.db import models
 from django.utils import timezone
 import uuid
+import re
+import difflib
+from fuzzywuzzy import fuzz
+from typing import Dict, Any, List, Tuple
 
 
 class TextSubmission(models.Model):
@@ -176,6 +180,10 @@ class Fragment(models.Model):
         default=False,
         help_text="Whether this fragment was mechanically verified in original text",
     )
+    similarity_score = models.FloatField(
+        default=0.0,
+        help_text="Similarity score as percentage (0.0-100.0) indicating how closely this fragment matches the original text",
+    )
     related_sentence = models.TextField(
         blank=True,
         null=True,
@@ -198,32 +206,148 @@ class Fragment(models.Model):
     def __str__(self):
         return f"{self.get_fragment_type_display()} #{self.sequence_number} for {self.submission.id}"
 
-    def verify_against_text(self, original_text: str) -> bool:
+    def _calculate_similarity_scores(self, original_text: str) -> Dict[str, Any]:
         """
-        Verify that this fragment exists verbatim in the original text.
+        Calculate comprehensive similarity scores for this fragment against the original text.
 
-        Updates the verification status and position if found.
+        Uses multiple algorithms to find the best match and calculate similarity scores.
 
         Args:
             original_text: The original text to search within
 
         Returns:
-            bool: True if fragment was found and verified, False otherwise
+            Dict containing best match information and similarity score
         """
-        # Look for exact match of the fragment content
-        start_pos = original_text.find(self.content)
+        fragment_content = self.content.strip()
 
+        # First try exact match
+        start_pos = original_text.find(fragment_content)
         if start_pos != -1:
-            # Fragment found - update position and verification status
-            self.start_position = start_pos
-            self.end_position = start_pos + len(self.content)
-            self.verified = True
-            self.save(update_fields=["start_position", "end_position", "verified"])
-            return True
-        else:
-            # Fragment not found - mark as unverified
-            self.verified = False
-            self.start_position = None
-            self.end_position = None
-            self.save(update_fields=["start_position", "end_position", "verified"])
-            return False
+            return {
+                "similarity_score": 100.0,
+                "start_position": start_pos,
+                "end_position": start_pos + len(fragment_content),
+                "match_type": "exact",
+                "verified": True,
+            }
+
+        # Try case-insensitive exact match
+        start_pos_ci = original_text.lower().find(fragment_content.lower())
+        if start_pos_ci != -1:
+            return {
+                "similarity_score": 95.0,  # Slightly lower for case differences
+                "start_position": start_pos_ci,
+                "end_position": start_pos_ci + len(fragment_content),
+                "match_type": "case_insensitive",
+                "verified": True,
+            }
+
+        # Use sliding window approach to find best partial match
+        best_score = 0.0
+        best_match = None
+        fragment_len = len(fragment_content)
+
+        # Define search window size (fragment length + some tolerance)
+        search_window_size = min(fragment_len + 100, len(original_text))
+
+        # Slide through the text to find best local match
+        for i in range(
+            0, len(original_text) - fragment_len + 1, max(1, fragment_len // 4)
+        ):
+            end_idx = min(i + search_window_size, len(original_text))
+            text_window = original_text[i:end_idx]
+
+            # Calculate multiple similarity metrics
+            ratio_score = fuzz.ratio(fragment_content, text_window)
+            partial_score = fuzz.partial_ratio(fragment_content, text_window)
+            token_sort_score = fuzz.token_sort_ratio(fragment_content, text_window)
+            token_set_score = fuzz.token_set_ratio(fragment_content, text_window)
+
+            # Use weighted average with emphasis on partial ratio for fragments
+            combined_score = (
+                ratio_score * 0.3
+                + partial_score * 0.4  # Emphasize partial matches
+                + token_sort_score * 0.15
+                + token_set_score * 0.15
+            )
+
+            if combined_score > best_score:
+                best_score = combined_score
+
+                # Find the best matching substring within this window
+                matcher = difflib.SequenceMatcher(None, fragment_content, text_window)
+                match_blocks = matcher.get_matching_blocks()
+
+                if match_blocks:
+                    # Find the longest matching block
+                    longest_match = max(match_blocks, key=lambda x: x.size)
+                    if longest_match.size > 0:
+                        match_start = i + longest_match.b
+                        match_end = match_start + longest_match.size
+
+                        best_match = {
+                            "similarity_score": combined_score,
+                            "start_position": match_start,
+                            "end_position": match_end,
+                            "match_type": "partial",
+                            "verified": combined_score
+                            >= 70.0,  # Threshold for verification
+                        }
+
+        # If no good match found, try word-level matching for very poor matches
+        if best_score < 50.0:
+            fragment_words = set(re.findall(r"\b\w+\b", fragment_content.lower()))
+            text_words = set(re.findall(r"\b\w+\b", original_text.lower()))
+
+            if fragment_words and text_words:
+                word_overlap = len(fragment_words.intersection(text_words))
+                word_similarity = (word_overlap / len(fragment_words)) * 100.0
+
+                if word_similarity > best_score:
+                    best_score = word_similarity
+                    best_match = {
+                        "similarity_score": word_similarity,
+                        "start_position": None,
+                        "end_position": None,
+                        "match_type": "word_overlap",
+                        "verified": word_similarity >= 70.0,
+                    }
+
+        return best_match or {
+            "similarity_score": 0.0,
+            "start_position": None,
+            "end_position": None,
+            "match_type": "no_match",
+            "verified": False,
+        }
+
+    def verify_against_text(self, original_text: str) -> bool:
+        """
+        Verify this fragment against the original text using similarity scoring.
+
+        Updates the verification status, position, and similarity score.
+
+        Args:
+            original_text: The original text to search within
+
+        Returns:
+            bool: True if fragment was found and verified (similarity >= 70%), False otherwise
+        """
+        match_result = self._calculate_similarity_scores(original_text)
+
+        # Update all fields based on similarity analysis
+        self.similarity_score = match_result["similarity_score"]
+        self.start_position = match_result["start_position"]
+        self.end_position = match_result["end_position"]
+        self.verified = match_result["verified"]
+
+        self.save(
+            update_fields=[
+                "similarity_score",
+                "start_position",
+                "end_position",
+                "verified",
+            ]
+        )
+
+        return self.verified

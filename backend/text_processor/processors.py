@@ -483,59 +483,27 @@ class VerificationService:
         fragment_content: str, original_text: str
     ) -> Dict[str, Any]:
         """
-        Verify that a fragment exists verbatim in the original text.
+        Verify that a fragment exists in the original text using similarity scoring.
 
         Args:
             fragment_content: The fragment to verify
             original_text: The original text to search in
 
         Returns:
-            Dict[str, Any]: Verification result with position and status
+            Dict[str, Any]: Verification result with position, status, and similarity score
         """
-        # Look for exact match
-        start_pos = original_text.find(fragment_content)
+        # Create a temporary fragment to use the enhanced verification logic
+        from .models import Fragment
 
-        if start_pos != -1:
-            return {
-                "verified": True,
-                "start_position": start_pos,
-                "end_position": start_pos + len(fragment_content),
-                "match_type": "exact",
-            }
-
-        # If exact match not found, try case-insensitive search
-        start_pos_ci = original_text.lower().find(fragment_content.lower())
-
-        if start_pos_ci != -1:
-            return {
-                "verified": True,
-                "start_position": start_pos_ci,
-                "end_position": start_pos_ci + len(fragment_content),
-                "match_type": "case_insensitive",
-            }
-
-        # Try searching for partial matches (fragments within sentences)
-        # This handles cases where LLM might extract parts of sentences
-        words = fragment_content.split()
-        if len(words) > 3:  # Only for longer fragments
-            # Try to find most of the words in sequence
-            for i in range(len(words) - 2):
-                partial_fragment = " ".join(words[i:])
-                if len(partial_fragment) > 20:  # Minimum length for partial match
-                    partial_pos = original_text.find(partial_fragment)
-                    if partial_pos != -1:
-                        return {
-                            "verified": True,
-                            "start_position": partial_pos,
-                            "end_position": partial_pos + len(partial_fragment),
-                            "match_type": "partial",
-                        }
+        temp_fragment = Fragment(content=fragment_content)
+        match_result = temp_fragment._calculate_similarity_scores(original_text)
 
         return {
-            "verified": False,
-            "start_position": None,
-            "end_position": None,
-            "match_type": "no_match",
+            "verified": match_result["verified"],
+            "start_position": match_result["start_position"],
+            "end_position": match_result["end_position"],
+            "match_type": match_result["match_type"],
+            "similarity_score": match_result["similarity_score"],
         }
 
     @staticmethod

@@ -21,6 +21,7 @@ class FragmentSerializer(serializers.ModelSerializer):
             "start_position",
             "end_position",
             "verified",
+            "similarity_score",
             "related_sentence",
             "sequence_number",
             "created_at",
