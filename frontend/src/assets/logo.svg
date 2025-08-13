@@ -1,0 +1,42 @@
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle/container -->
+  <rect x="8" y="8" width="44" height="44" rx="12" fill="#2563eb" opacity="0.1" stroke="#2563eb" stroke-width="1"/>
+  
+  <!-- Icon representing text fragments -->
+  <g transform="translate(16, 16)">
+    <!-- Main document/text representation -->
+    <rect x="2" y="2" width="20" height="26" rx="2" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+    
+    <!-- Text lines -->
+    <line x1="5" y1="6" x2="16" y2="6" stroke="#2563eb" stroke-width="1" opacity="0.7"/>
+    <line x1="5" y1="9" x2="19" y2="9" stroke="#2563eb" stroke-width="1" opacity="0.7"/>
+    <line x1="5" y1="12" x2="14" y2="12" stroke="#2563eb" stroke-width="1" opacity="0.7"/>
+    
+    <!-- Fragment extraction arrows -->
+    <path d="M22 8 L26 10 L22 12 Z" fill="#2563eb" opacity="0.8"/>
+    <path d="M22 18 L26 20 L22 22 Z" fill="#2563eb" opacity="0.8"/>
+    
+    <!-- Extracted fragments -->
+    <rect x="27" y="7" width="6" height="6" rx="1" fill="#2563eb" opacity="0.3"/>
+    <rect x="27" y="17" width="6" height="6" rx="1" fill="#2563eb" opacity="0.3"/>
+  </g>
+  
+  <!-- SMR.IO text -->
+  <g font-family="system-ui, -apple-system, sans-serif" font-weight="600">
+    <!-- SMR -->
+    <text x="65" y="25" font-size="24" fill="#1f2937" letter-spacing="-0.5px">SMR</text>
+    <!-- .io -->
+    <text x="128" y="25" font-size="18" fill="#6b7280" font-weight="400">.io</text>
+  </g>
+  
+  <!-- Tagline -->
+  <text x="65" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#9ca3af" font-weight="400" letter-spacing="0.5px">TEXT PROCESSING & ANALYSIS</text>
+  
+  <!-- Verification dots/indicators -->
+  <g transform="translate(65, 48)">
+    <circle cx="0" cy="0" r="2" fill="#10b981"/>
+    <circle cx="8" cy="0" r="2" fill="#10b981"/>
+    <circle cx="16" cy="0" r="2" fill="#10b981"/>
+    <text x="24" y="3" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#6b7280">VERIFIED</text>
+  </g>
+</svg>

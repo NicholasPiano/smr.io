@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { TextInput } from './TextInput';
+import logoSvg from '../assets/logo.svg';
 import { 
   startProcessing, 
   extractF1Fragments, 
@@ -583,9 +584,32 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
           }
 
+          .processing-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+          }
+
+          .processing-header {
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            backdrop-filter: blur(10px);
+          }
+
+          .processing-logo {
+            height: 40px;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+          }
+
           .side-layout {
             display: flex;
-            height: 100vh;
+            height: calc(100vh - 65px);
             width: 100%;
           }
 
@@ -893,6 +917,18 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             margin-bottom: 32px;
           }
 
+          .logo-header {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+          }
+
+          .app-logo {
+            height: 60px;
+            width: auto;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+          }
+
           .input-title {
             font-size: 32px;
             font-weight: bold;
@@ -946,6 +982,9 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
         <div className="main-body input-stage">
           <div className="input-container">
             <div className="input-header">
+              <div className="logo-header">
+                <img src={logoSvg} alt="SMR.io" className="app-logo" />
+              </div>
               <h1 className="input-title">SMR.io Enhanced Processor</h1>
               <p className="input-subtitle">Advanced text analysis with interactive visualization</p>
             </div>
@@ -961,7 +1000,13 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           </div>
         </div>
       ) : (
-        <div className="side-layout">
+        <div className="processing-layout">
+          {/* Processing Header */}
+          <div className="processing-header">
+            <img src={logoSvg} alt="SMR.io" className="processing-logo" />
+          </div>
+          
+          <div className="side-layout">
           {/* Left Column - Original Text */}
           <div className="original-text-column">
             <div className="content-box original-text-box">
@@ -1130,6 +1175,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
               ↻
             </button>
           )}
+        </div>
         </div>
       )}
     </div>
