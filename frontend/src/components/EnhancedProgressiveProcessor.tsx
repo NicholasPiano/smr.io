@@ -712,7 +712,7 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
             width: 100%;
             height: 100vh;
             display: flex;
-            padding: 20px;
+            padding: 12px;
           }
 
           .main-body.input-stage.mobile {
@@ -987,13 +987,13 @@ export default function EnhancedProgressiveProcessor(): JSX.Element {
           }
 
           .input-container {
-            padding: 32px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
           }
 
           .input-header {
