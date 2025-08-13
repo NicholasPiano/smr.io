@@ -25,9 +25,6 @@ RUN openssl genrsa -out /etc/letsencrypt/live/llmsmr.io/privkey.pem 2048 && \
 # Enable the site configuration
 RUN ln -sf /etc/nginx/sites-available/smr-io.conf /etc/nginx/sites-enabled/default
 
-# Test nginx configuration
-RUN nginx -t
-
 # Expose ports
 EXPOSE 80 443
 

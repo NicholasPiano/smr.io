@@ -58,7 +58,7 @@ AWS_DEFAULT_REGION=${aws_region}
 # Django Configuration
 DEBUG=False
 DJANGO_SETTINGS_MODULE=smr_backend.settings
-SECRET_KEY=$(python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+SECRET_KEY=$(python3 -c 'import secrets; import string; chars = string.ascii_letters + string.digits; print("".join(secrets.choice(chars) for i in range(50)))')
 ALLOWED_HOSTS=${domain_name},www.${domain_name}
 
 # Database
