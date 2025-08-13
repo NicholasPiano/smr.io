@@ -1355,17 +1355,21 @@ function VisualMiniMap({
         </div>
       </div>
 
-      {/* Verification Statistics */}
-      {verificationSummary && (
+      {/* Average Similarity Statistics */}
+      {(f1Fragments.length > 0 || f2Fragments.length > 0) && (
         <div className="mini-map-verification">
-          <div className="mini-map-verification-title">Verification Stats</div>
+          <div className="mini-map-verification-title">Average Similarity</div>
           <div className="mini-map-verification-stats">
-            <div className="mini-map-verification-stat f1">
-              F1: {Math.round(verificationSummary.F1_verification_rate * 100)}%
-            </div>
-            <div className="mini-map-verification-stat f2">
-              F2: {Math.round(verificationSummary.F2_verification_rate * 100)}%
-            </div>
+            {f1Fragments.length > 0 && (
+              <div className="mini-map-verification-stat f1">
+                F1: {formatSimilarityScore(calculateAverageSimilarity(f1Fragments))}
+              </div>
+            )}
+            {f2Fragments.length > 0 && (
+              <div className="mini-map-verification-stat f2">
+                F2: {formatSimilarityScore(calculateAverageSimilarity(f2Fragments))}
+              </div>
+            )}
           </div>
         </div>
       )}
