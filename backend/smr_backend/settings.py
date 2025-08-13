@@ -33,7 +33,7 @@ DEBUG = (
     os.environ.get("DEBUG", "False").lower() == "true" or os.environ.get("DEBUG") == "1"
 )
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "backend"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "backend", "13.41.17.106", "llmsmr.io"]
 
 # Application definition
 INSTALLED_APPS = [
